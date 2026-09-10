@@ -1,0 +1,335 @@
+ScreenManager:
+    LoginScreen:
+    RegisterScreen:
+    MainScreen:
+
+<LoginScreen>:
+    name: "login"
+    MDFloatLayout:
+        md_bg_color: 0.94, 0.96, 0.98, 1
+
+        MDCard:
+            size_hint: 0.88, 0.7
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            elevation: 3
+            padding: "24dp"
+            spacing: "12dp"
+            orientation: "vertical"
+            radius: [20, 20, 20, 20]
+
+            Image:
+                source: "logo_doit.png"
+                size_hint: (None, None)
+                size: ("180dp", "60dp")
+                pos_hint: {"center_x": 0.5}
+                allow_stretch: True
+
+            MDLabel:
+                text: "Masuk ke Akun Anda"
+                font_style: "Body1"
+                halign: "center"
+                theme_text_color: "Secondary"
+
+            Widget:
+                size_hint_y: None
+                height: "10dp"
+
+            MDTextField:
+                id: email_input
+                hint_text: "Email / Username"
+                icon_left: "account"
+                mode: "rectangle"
+
+            MDTextField:
+                id: password_input
+                hint_text: "Kata Sandi"
+                icon_left: "lock"
+                password: True
+                mode: "rectangle"
+
+            MDRaisedButton:
+                text: "MASUK"
+                size_hint_x: 1
+                height: "48dp"
+                md_bg_color: 0.12, 0.53, 0.90, 1
+                on_release: root.do_login()
+
+            MDFlatButton:
+                text: "Belum punya akun? Daftar sekarang"
+                pos_hint: {"center_x": 0.5}
+                theme_text_color: "Custom"
+                text_color: 0.12, 0.53, 0.90, 1
+                on_release: root.manager.current = "register"
+
+<RegisterScreen>:
+    name: "register"
+    MDFloatLayout:
+        md_bg_color: 0.94, 0.96, 0.98, 1
+
+        MDCard:
+            size_hint: 0.88, 0.78
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            elevation: 3
+            padding: "24dp"
+            spacing: "10dp"
+            orientation: "vertical"
+            radius: [20, 20, 20, 20]
+
+            Image:
+                source: "logo_doit.png"
+                size_hint: (None, None)
+                size: ("160dp", "50dp")
+                pos_hint: {"center_x": 0.5}
+                allow_stretch: True
+
+            MDLabel:
+                text: "Buat Akun Baru"
+                font_style: "Body1"
+                halign: "center"
+                theme_text_color: "Secondary"
+
+            MDTextField:
+                id: reg_nama_input
+                hint_text: "Nama Lengkap"
+                icon_left: "account-box"
+                mode: "rectangle"
+
+            MDTextField:
+                id: reg_email_input
+                hint_text: "Email"
+                icon_left: "email"
+                mode: "rectangle"
+
+            MDTextField:
+                id: reg_password_input
+                hint_text: "Kata Sandi"
+                icon_left: "lock"
+                password: True
+                mode: "rectangle"
+
+            MDRaisedButton:
+                text: "DAFTAR AKUN"
+                size_hint_x: 1
+                height: "48dp"
+                md_bg_color: 0.12, 0.53, 0.90, 1
+                on_release: root.do_register()
+
+            MDFlatButton:
+                text: "Sudah punya akun? Masuk"
+                pos_hint: {"center_x": 0.5}
+                theme_text_color: "Custom"
+                text_color: 0.12, 0.53, 0.90, 1
+                on_release: root.manager.current = "login"
+
+<MainScreen>:
+    name: "main"
+    MDFloatLayout:
+        MDFloatLayout:
+            id: header
+            size_hint: (1, 0.22)
+            pos_hint: {"top": 1}
+            md_bg_color: (0.12, 0.53, 0.90, 1)
+
+            Image:
+                source: "logo_doit.png"
+                size_hint: (None, None)
+                size: ("120dp", "40dp")
+                pos_hint: {"right": 0.95, "top": 0.9}
+                opacity: 0.85
+
+            MDLabel:
+                id: greeting_label
+                text: "Selamat Pagi!"
+                font_style: "H6"
+                bold: True
+                theme_text_color: "Custom"
+                text_color: (1, 1, 1, 1)
+                pos_hint: {"x": 0.06, "top": 0.85}
+
+            MDLabel:
+                text: "Selesaikan tugas & raih targetmu hari ini"
+                font_style: "Caption"
+                theme_text_color: "Custom"
+                text_color: (0.9, 0.95, 1, 1)
+                pos_hint: {"x": 0.06, "top": 0.65}
+
+            MDCard:
+                size_hint: (None, None)
+                size: ("160dp", "30dp")
+                pos_hint: {"x": 0.06, "top": 0.42}
+                md_bg_color: (1, 1, 1, 0.25)
+                radius: [15,]
+                padding: ["8dp", "2dp", "8dp", "2dp"]
+
+                MDIcon:
+                    icon: "calendar-month"
+                    theme_text_color: "Custom"
+                    text_color: (1, 1, 1, 1)
+                    size_hint_x: None
+                    width: "24dp"
+
+                MDLabel:
+                    id: date_label
+                    text: "10 Sep 2026"
+                    font_style: "Caption"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: (1, 1, 1, 1)
+                    halign: "center"
+
+        MDBottomNavigation:
+            size_hint: (1, 0.78)
+            pos_hint: {"top": 0.78}
+            selected_color_background: 0, 0, 0, 0
+            text_color_active: 0.12, 0.53, 0.90, 1
+
+            MDBottomNavigationItem:
+                name: "screen_home"
+                text: "Beranda"
+                icon: "home"
+
+                MDFloatLayout:
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint: (0.9, 0.08)
+                        pos_hint: {"center_x": 0.5, "top": 0.98}
+                        spacing: "10dp"
+
+                        MDRaisedButton:
+                            id: btn_tugas
+                            text: "Tugas"
+                            icon: "pin"
+                            elevation: 0
+                            md_bg_color: (0.12, 0.53, 0.90, 1)
+                            on_release: root.switch_filter("Tugas")
+
+                        MDRaisedButton:
+                            id: btn_kebiasaan
+                            text: "Kebiasaan"
+                            icon: "lightning-bolt"
+                            elevation: 0
+                            md_bg_color: (0.85, 0.88, 0.92, 1)
+                            text_color: (0.3, 0.3, 0.3, 1)
+                            on_release: root.switch_filter("Kebiasaan")
+
+                    ScrollView:
+                        size_hint: (1, 0.88)
+                        pos_hint: {"top": 0.88}
+
+                        MDBoxLayout:
+                            id: task_list
+                            orientation: "vertical"
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: "12dp"
+                            padding: ["16dp", "10dp", "16dp", "80dp"]
+
+                    MDFloatingActionButton:
+                        icon: "plus"
+                        md_bg_color: (0.12, 0.53, 0.90, 1)
+                        pos_hint: {"right": 0.9, "y": 0.05}
+                        on_release: root.show_add_task_dialog()
+
+            MDBottomNavigationItem:
+                name: "screen_stats"
+                text: "Statistik"
+                icon: "chart-bar"
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    padding: "16dp"
+                    spacing: "16dp"
+
+                    MDCard:
+                        size_hint: (1, None)
+                        height: "80dp"
+                        md_bg_color: (1, 0.95, 0.9, 1)
+                        line_color: (1, 0.6, 0.2, 0.5)
+                        radius: [12,]
+                        padding: "16dp"
+
+                        MDIcon:
+                            icon: "fire"
+                            theme_text_color: "Custom"
+                            text_color: (1, 0.4, 0, 1)
+                            font_size: "36sp"
+                            pos_hint: {"center_y": 0.5}
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+                            padding: ["12dp", "0dp", "0dp", "0dp"]
+
+                            MDLabel:
+                                text: "Streak Saat Ini"
+                                font_style: "Caption"
+                                theme_text_color: "Secondary"
+
+                            MDLabel:
+                                id: streak_label
+                                text: "0 Hari Beruntun"
+                                font_style: "H6"
+                                bold: True
+                                theme_text_color: "Custom"
+                                text_color: (1, 0.4, 0, 1)
+
+                    MDLabel:
+                        text: "Riwayat Selesai"
+                        font_style: "Subtitle1"
+                        bold: True
+                        size_hint_y: None
+                        height: "24dp"
+
+                    ScrollView:
+                        MDBoxLayout:
+                            id: history_list
+                            orientation: "vertical"
+                            size_hint_y: None
+                            height: self.minimum_height
+                            spacing: "8dp"
+
+            MDBottomNavigationItem:
+                name: "screen_profile"
+                text: "Profil"
+                icon: "account"
+
+                MDFloatLayout:
+                    MDCard:
+                        size_hint: (0.9, 0.5)
+                        pos_hint: {"center_x": 0.5, "top": 0.92}
+                        elevation: 2
+                        radius: [16,]
+                        padding: "20dp"
+                        orientation: "vertical"
+                        spacing: "12dp"
+
+                        MDIcon:
+                            icon: "account-circle"
+                            font_size: "72sp"
+                            theme_text_color: "Custom"
+                            text_color: 0.12, 0.53, 0.90, 1
+                            pos_hint: {"center_x": 0.5}
+
+                        MDLabel:
+                            id: profile_nama
+                            text: "Nama Pengguna"
+                            font_style: "H6"
+                            bold: True
+                            halign: "center"
+
+                        MDLabel:
+                            id: profile_email
+                            text: "email@domain.com"
+                            font_style: "Caption"
+                            theme_text_color: "Secondary"
+                            halign: "center"
+
+                        Widget:
+                            size_hint_y: None
+                            height: "10dp"
+
+                        MDRaisedButton:
+                            text: "KELUAR (LOGOUT)"
+                            icon: "logout"
+                            md_bg_color: (0.9, 0.2, 0.2, 1)
+                            pos_hint: {"center_x": 0.5}
+                            on_release: root.do_logout()
