@@ -9,30 +9,29 @@ ScreenManager:
         md_bg_color: 0.94, 0.96, 0.98, 1
 
         MDCard:
-            size_hint: 0.88, 0.7
+            size_hint: 0.9, 0.78
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             elevation: 3
-            padding: "24dp"
-            spacing: "12dp"
+            padding: "20dp"
+            spacing: "10dp"
             orientation: "vertical"
             radius: [20, 20, 20, 20]
 
             Image:
                 source: "logo_doit.png"
                 size_hint: (None, None)
-                size: ("180dp", "60dp")
+                size: ("160dp", "55dp")
                 pos_hint: {"center_x": 0.5}
-                allow_stretch: True
 
             MDLabel:
                 text: "Masuk ke Akun Anda"
-                font_style: "Body1"
+                font_style: "Body2"
                 halign: "center"
                 theme_text_color: "Secondary"
 
             Widget:
                 size_hint_y: None
-                height: "10dp"
+                height: "8dp"
 
             MDTextField:
                 id: email_input
@@ -40,12 +39,23 @@ ScreenManager:
                 icon_left: "account"
                 mode: "rectangle"
 
-            MDTextField:
-                id: password_input
-                hint_text: "Kata Sandi"
-                icon_left: "lock"
-                password: True
-                mode: "rectangle"
+            MDFloatLayout:
+                size_hint_y: None
+                height: "60dp"
+
+                MDTextField:
+                    id: password_input
+                    hint_text: "Kata Sandi"
+                    icon_left: "lock"
+                    password: True
+                    mode: "rectangle"
+                    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                MDIconButton:
+                    icon: "eye-off"
+                    pos_hint: {"center_x": 0.88, "center_y": 0.5}
+                    theme_text_color: "Hint"
+                    on_release: root.toggle_password_visibility(self)
 
             MDRaisedButton:
                 text: "MASUK"
@@ -61,16 +71,23 @@ ScreenManager:
                 text_color: 0.12, 0.53, 0.90, 1
                 on_release: root.manager.current = "register"
 
+            MDFlatButton:
+                text: "Masuk sebagai Admin"
+                pos_hint: {"center_x": 0.5}
+                theme_text_color: "Secondary"
+                font_style: "Caption"
+                on_release: root.do_admin_login()
+
 <RegisterScreen>:
     name: "register"
     MDFloatLayout:
         md_bg_color: 0.94, 0.96, 0.98, 1
 
         MDCard:
-            size_hint: 0.88, 0.78
+            size_hint: 0.9, 0.8
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             elevation: 3
-            padding: "24dp"
+            padding: "20dp"
             spacing: "10dp"
             orientation: "vertical"
             radius: [20, 20, 20, 20]
@@ -78,13 +95,12 @@ ScreenManager:
             Image:
                 source: "logo_doit.png"
                 size_hint: (None, None)
-                size: ("160dp", "50dp")
+                size: ("150dp", "50dp")
                 pos_hint: {"center_x": 0.5}
-                allow_stretch: True
 
             MDLabel:
                 text: "Buat Akun Baru"
-                font_style: "Body1"
+                font_style: "Body2"
                 halign: "center"
                 theme_text_color: "Secondary"
 
