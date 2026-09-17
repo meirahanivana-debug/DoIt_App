@@ -17,6 +17,7 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
+from kivymd.uix.menu import MDDropdownMenu
 
 
 class LoginScreen(Screen):
@@ -45,7 +46,7 @@ class LoginScreen(Screen):
                 app.current_user_nama = user[1]
                 app.current_user_email = user[2]
                 app.current_user_password = user[3]
-                app.current_user_avatar = user[4]
+                app.current_user_avatar = user[4] if len(user) > 4 and user[4] else "account"
 
                 self.manager.get_screen("main").setup_user_data()
                 self.manager.current = "main"
@@ -129,13 +130,14 @@ class MainScreen(Screen):
         super().__init__(**kwargs)
         self.current_filter = "Tugas"
         self.dialog = None
+        self.category_menu = None
 
     def setup_user_data(self):
         app = MDApp.get_running_app()
         self.ids.greeting_label.text = f"Selamat Pagi, {app.current_user_nama}!"
         self.ids.profile_nama.text = app.current_user_nama
         self.ids.profile_email.text = app.current_user_email
-        self.ids.profile_avatar_label.text = app.current_user_avatar
+        self.ids.profile_avatar_icon.icon = app.current_user_avatar if app.current_user_avatar else "account"
         self.ids.profile_info_email.text = app.current_user_email
         self.ids.profile_info_nama.text = app.current_user_nama
         self.ids.date_label.text = datetime.now().strftime("%d %b %Y")
@@ -301,17 +303,19 @@ class MainScreen(Screen):
         app = MDApp.get_running_app()
         weekly_data = database.get_weekly_completed_counts(app.current_user_id)
 
-        max_val = max([cnt for _, cnt in weekly_data] + [1])
-
         for day, cnt in weekly_data:
-            col = MDBoxLayout(orientation="vertical", spacing="4dp")
+            col = MDBoxLayout(orientation="vertical", spacing="4dp", alignment_vertical="bottom")
 
             val_label = MDLabel(text=str(cnt), font_style="Caption", halign="center", theme_text_color="Secondary", size_hint_y=None, height="14dp")
 
-            height_percent = max(0.1, min(1.0, cnt / max_val))
+            # Perhitungan tinggi grafik dinamis berbasis dp (8dp per tugas selesai)
+            calculated_height = max(10, min(100, cnt * 8))
+            
             bar_card = MDCard(
-                size_hint=(0.6, height_percent),
-                md_bg_color=(0.12, 0.53, 0.90, 0.85),
+                size_hint=(None, None),
+                width="24dp",
+                height=f"{calculated_height}dp",
+                md_bg_color=(0.12, 0.53, 0.90, 0.85) if cnt > 0 else (0.85, 0.88, 0.92, 1),
                 radius=[4, 4, 0, 0],
                 pos_hint={"center_x": 0.5}
             )
@@ -326,11 +330,24 @@ class MainScreen(Screen):
 
     def show_add_task_dialog(self):
         self.input_judul = MDTextField(hint_text="Nama Tugas / Kebiasaan")
-        self.input_kategori = MDTextField(hint_text="Kategori (cth: Sekolah, Pribadi)")
+        self.input_kategori = MDTextField(
+            hint_text="Pilih atau Ketik Kategori",
+            text="Sekolah"
+        )
+        
+        btn_drop = MDIconButton(
+            icon="menu-down",
+            pos_hint={"center_y": 0.5}
+        )
+        btn_drop.bind(on_release=self.open_category_menu)
 
-        content = MDBoxLayout(orientation="vertical", spacing="12dp", size_hint_y=None, height="120dp")
+        kat_box = MDBoxLayout(orientation="horizontal", spacing="4dp")
+        kat_box.add_widget(self.input_kategori)
+        kat_box.add_widget(btn_drop)
+
+        content = MDBoxLayout(orientation="vertical", spacing="12dp", size_hint_y=None, height="130dp")
         content.add_widget(self.input_judul)
-        content.add_widget(self.input_kategori)
+        content.add_widget(kat_box)
 
         self.dialog = MDDialog(
             title=f"Tambah {self.current_filter}",
@@ -346,6 +363,27 @@ class MainScreen(Screen):
             ]
         )
         self.dialog.open()
+
+    def open_category_menu(self, instance):
+        categories = ["Sekolah", "Kuliah", "Pekerjaan", "Pribadi", "Kesehatan", "Lainnya"]
+        menu_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": cat,
+                "on_release": lambda x=cat: self.set_category(x),
+            } for cat in categories
+        ]
+        self.category_menu = MDDropdownMenu(
+            caller=instance,
+            items=menu_items,
+            width_mult=4,
+        )
+        self.category_menu.open()
+
+    def set_category(self, text_item):
+        self.input_kategori.text = text_item
+        if self.category_menu:
+            self.category_menu.dismiss()
 
     def save_task(self):
         judul = self.input_judul.text.strip()
@@ -369,29 +407,29 @@ class MainScreen(Screen):
         app.current_user_nama = ""
         app.current_user_email = ""
         app.current_user_password = ""
-        app.current_user_avatar = "🐶"
+        app.current_user_avatar = "account"
         self.manager.current = "login"
 
 
 class EditProfileScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.selected_avatar = "🐶"
+        self.selected_avatar = "account"
 
     def setup_data(self):
         app = MDApp.get_running_app()
         self.ids.edit_nama_input.text = app.current_user_nama
         self.ids.edit_email_input.text = app.current_user_email
-        self.selected_avatar = app.current_user_avatar
-        self.ids.avatar_preview.text = app.current_user_avatar
+        self.selected_avatar = app.current_user_avatar if app.current_user_avatar else "account"
+        self.ids.avatar_preview_icon.icon = self.selected_avatar
 
         self.ids.pass_old.text = ""
         self.ids.pass_new.text = ""
         self.ids.pass_confirm.text = ""
 
-    def select_avatar(self, emoji):
-        self.selected_avatar = emoji
-        self.ids.avatar_preview.text = emoji
+    def select_avatar(self, icon_name):
+        self.selected_avatar = icon_name
+        self.ids.avatar_preview_icon.icon = icon_name
 
     def save_changes(self):
         app = MDApp.get_running_app()
@@ -462,7 +500,7 @@ class DoItApp(MDApp):
         self.current_user_nama = ""
         self.current_user_email = ""
         self.current_user_password = ""
-        self.current_user_avatar = "🐶"
+        self.current_user_avatar = "account"
 
         database.init_db()
         return Builder.load_file("doit.kv")

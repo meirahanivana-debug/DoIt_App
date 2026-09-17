@@ -7,14 +7,14 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     
-    # Tabel Users (Termasuk kolom avatar)
+    # Tabel Users (Termasuk kolom avatar dengan default Material Icon)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nama TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            avatar TEXT DEFAULT '🐶'
+            avatar TEXT DEFAULT 'account'
         )
     ''')
     
@@ -39,7 +39,7 @@ def register_user(nama, email, password):
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (nama, email, password, avatar) VALUES (?, ?, ?, '🐶')", (nama, email, password))
+        cursor.execute("INSERT INTO users (nama, email, password, avatar) VALUES (?, ?, ?, 'account')", (nama, email, password))
         conn.commit()
         conn.close()
         return True
@@ -49,7 +49,7 @@ def register_user(nama, email, password):
 def verify_user(email, password):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nama, email, password, COALESCE(avatar, '🐶') FROM users WHERE email = ? AND password = ?", (email, password))
+    cursor.execute("SELECT id, nama, email, password, COALESCE(avatar, 'account') FROM users WHERE email = ? AND password = ?", (email, password))
     user = cursor.fetchone()
     conn.close()
     return user
