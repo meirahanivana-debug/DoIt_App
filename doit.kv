@@ -156,7 +156,6 @@ ScreenManager:
     MDFloatLayout:
         md_bg_color: app.theme_cls.bg_normal
 
-        # Header Atas
         MDBoxLayout:
             id: main_header
             orientation: "vertical"
@@ -224,44 +223,19 @@ ScreenManager:
                         text_color: 1, 1, 1, 1
                         pos_hint: {"center_y": 0.5}
 
-        # Content Screen Manager
         ScreenManager:
             id: main_sm
             size_hint: (1, None)
             height: "450dp"
             pos_hint: {"top": 0.80}
 
-            # Tab Beranda
             Screen:
                 name: "tab_beranda"
                 MDBoxLayout:
                     orientation: "vertical"
                     padding: ["16dp", "10dp", "16dp", "10dp"]
-                    spacing: "10dp"
+                    spacing: "16dp"
 
-                    # REVISI 1: Search & Sort Bar Dipindah ke Atas Filter
-                    MDBoxLayout:
-                        orientation: "horizontal"
-                        size_hint_y: None
-                        height: "42dp"
-                        spacing: "8dp"
-
-                        MDTextField:
-                            id: search_field
-                            hint_text: "Cari tugas..."
-                            icon_left: "magnify"
-                            mode: "rectangle"
-                            on_text: root.on_search_text_change(self.text)
-
-                        MDIconButton:
-                            id: sort_btn
-                            icon: "sort-variant"
-                            theme_icon_color: "Custom"
-                            icon_color: 0.12, 0.53, 0.90, 1
-                            pos_hint: {"center_y": 0.5}
-                            on_release: root.open_sort_menu(self)
-
-                    # Tombol Filter Tugas & Kebiasaan
                     MDBoxLayout:
                         orientation: "horizontal"
                         size_hint_y: None
@@ -286,12 +260,32 @@ ScreenManager:
                             text_color: 0.3, 0.3, 0.3, 1
                             on_release: root.switch_filter("Kebiasaan")
 
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "42dp"
+                        spacing: "8dp"
+
+                        MDTextField:
+                            id: search_field
+                            hint_text: "Cari tugas..."
+                            icon_left: "magnify"
+                            mode: "rectangle"
+                            on_text: root.on_search_text_change(self.text)
+
+                        MDIconButton:
+                            id: sort_btn
+                            icon: "sort-variant"
+                            theme_icon_color: "Custom"
+                            icon_color: 0.12, 0.53, 0.90, 1
+                            pos_hint: {"center_y": 0.5}
+                            on_release: root.open_sort_menu(self)
+
                     ScrollView:
                         MDList:
                             id: task_list
                             spacing: "8dp"
 
-            # Tab Statistik
             Screen:
                 name: "tab_statistik"
                 MDBoxLayout:
@@ -301,9 +295,9 @@ ScreenManager:
 
                     MDCard:
                         size_hint: (1, None)
-                        height: "65dp"
+                        height: "60dp"
                         radius: [14]
-                        padding: ["16dp", "8dp", "16dp", "8dp"]
+                        padding: ["16dp", "6dp", "16dp", "6dp"]
                         md_bg_color: app.theme_cls.bg_light
                         elevation: 1
 
@@ -313,7 +307,7 @@ ScreenManager:
 
                             MDIcon:
                                 icon: "fire"
-                                font_size: "30sp"
+                                font_size: "26sp"
                                 theme_text_color: "Custom"
                                 text_color: 0.95, 0.4, 0.1, 1
                                 pos_hint: {"center_y": 0.5}
@@ -333,6 +327,30 @@ ScreenManager:
                                     theme_text_color: "Custom"
                                     text_color: 0.95, 0.4, 0.1, 1
 
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "36dp"
+                        spacing: "8dp"
+
+                        MDRaisedButton:
+                            id: btn_chart_weekly
+                            text: "Mingguan"
+                            size_hint_x: 0.5
+                            elevation: 1
+                            md_bg_color: 0.12, 0.53, 0.90, 1
+                            text_color: 1, 1, 1, 1
+                            on_release: root.set_chart_mode("weekly")
+
+                        MDRaisedButton:
+                            id: btn_chart_monthly
+                            text: "Bulanan (4 Mingu)"
+                            size_hint_x: 0.5
+                            elevation: 0
+                            md_bg_color: 0.85, 0.88, 0.92, 1
+                            text_color: 0.3, 0.3, 0.3, 1
+                            on_release: root.set_chart_mode("monthly")
+
                     MDCard:
                         size_hint: (1, None)
                         height: "150dp"
@@ -345,6 +363,7 @@ ScreenManager:
                             orientation: "vertical"
 
                             MDLabel:
+                                id: chart_title_label
                                 text: "Tugas Selesai (7 Hari Terakhir)"
                                 font_style: "Caption"
                                 bold: True
@@ -363,7 +382,7 @@ ScreenManager:
                         height: "26dp"
 
                         MDLabel:
-                            text: "Riwayat (7 Hari Terakhir)"
+                            text: "Riwayat Aktivitas"
                             font_style: "Subtitle2"
                             bold: True
                             theme_text_color: "Primary"
@@ -381,7 +400,6 @@ ScreenManager:
                             id: history_list
                             spacing: "8dp"
 
-            # Tab Profil
             Screen:
                 name: "tab_profil"
                 ScrollView:
@@ -432,7 +450,6 @@ ScreenManager:
                                     theme_text_color: "Secondary"
                                     halign: "center"
 
-                                # REVISI 2: Menghapus Chip "Akun Aktif" & Mengetengahkan Tanggal Bergabung
                                 MDLabel:
                                     id: profile_created_at
                                     text: "Bergabung: -"
@@ -447,8 +464,6 @@ ScreenManager:
                                     text_color: 0.12, 0.53, 0.90, 1
                                     pos_hint: {"center_x": 0.5}
                                     on_release: root.open_edit_profile()
-
-                        # REVISI 4: Menghapus MDCard "Progres Hari Ini" sepenuhnya dari layout profil
 
                         MDCard:
                             size_hint: (1, None)
@@ -532,7 +547,7 @@ ScreenManager:
                             size_hint_x: 1
                             height: "44dp"
                             md_bg_color: 0.88, 0.2, 0.2, 1
-                            on_release: root.do_logout()
+                            on_release: root.open_logout_confirmation()
 
                         MDLabel:
                             text: "Dolt App v1.0.0 • 2026"

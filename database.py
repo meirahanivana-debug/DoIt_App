@@ -7,7 +7,6 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     
-    # Tabel Users
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +18,6 @@ def init_db():
         )
     ''')
     
-    # Tabel Tasks
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +32,6 @@ def init_db():
         )
     ''')
 
-    # Tabel Categories
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +41,6 @@ def init_db():
         )
     ''')
     
-    # Migrasi otomatis jika kolom deadline/created_at belum ada pada DB terdahulu
     try:
         cursor.execute("ALTER TABLE tasks ADD COLUMN deadline TEXT")
     except sqlite3.OperationalError:
@@ -102,7 +98,6 @@ def update_user_password(user_id, new_password):
     conn.commit()
     conn.close()
 
-# --- Kelola Kategori ---
 def get_user_categories(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -125,7 +120,6 @@ def delete_category(cat_id):
     conn.commit()
     conn.close()
 
-# --- Kelola Tugas & Statistik ---
 def get_tasks_by_user(user_id, tipe, sort_by="default", search_query=""):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -255,6 +249,28 @@ def get_weekly_completed_counts(user_id):
         cnt = cursor.fetchone()[0]
         day_name = (today - timedelta(days=i)).strftime("%a")
         counts.append((day_name, cnt))
+        
+    conn.close()
+    return counts
+
+def get_monthly_completed_counts(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    
+    today = datetime.now().date()
+    counts = []
+    
+    for i in range(3, -1, -1):
+        start_date = (today - timedelta(days=(i * 7) + 6)).strftime("%Y-%m-%d")
+        end_date = (today - timedelta(days=i * 7)).strftime("%Y-%m-%d")
+        
+        cursor.execute("""
+            SELECT COUNT(*) FROM tasks 
+            WHERE user_id = ? AND status = 'Selesai' AND tanggal_selesai BETWEEN ? AND ?
+        """, (user_id, start_date, end_date))
+        cnt = cursor.fetchone()[0]
+        week_name = f"Mng {4 - i}"
+        counts.append((week_name, cnt))
         
     conn.close()
     return counts

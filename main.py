@@ -137,7 +137,9 @@ class MainScreen(Screen):
         self.current_filter = "Tugas"
         self.sort_by = "default"
         self.search_query = ""
+        self.chart_mode = "weekly"
         self.dialog = None
+        self.logout_dialog = None
         self.category_menu = None
         self.sort_menu = None
         self.selected_date = None
@@ -162,7 +164,6 @@ class MainScreen(Screen):
         self.ids.profile_email.text = app.current_user_email
         self.ids.profile_avatar_img.source = app.current_user_avatar if app.current_user_avatar else "avatars/avatar1.png"
         
-        # REVISI 3: Format tanggal bergabung menjadi DD-MM-YYYY
         created_at_val = app.current_user_created_at
         if created_at_val and created_at_val != "-":
             try:
@@ -179,7 +180,7 @@ class MainScreen(Screen):
         self.load_tasks()
         self.load_history()
         self.update_streak()
-        self.load_weekly_chart()
+        self.load_chart_data()
         self.load_user_stats()
 
     def apply_header_color(self):
@@ -207,7 +208,6 @@ class MainScreen(Screen):
             self.ids.nav_profile.icon_color = blue
 
     def load_user_stats(self):
-        # REVISI 4: Menghapus logika akses ID widget stat_progress_bar / stat_percent_label / stat_summary_label
         pass
 
     def switch_filter(self, filter_type):
@@ -227,6 +227,26 @@ class MainScreen(Screen):
             self.ids.btn_tugas.text_color = (0.3, 0.3, 0.3, 1)
             self.ids.btn_tugas.elevation = 0
         self.load_tasks()
+
+    def set_chart_mode(self, mode):
+        self.chart_mode = mode
+        if mode == "weekly":
+            self.ids.btn_chart_weekly.md_bg_color = (0.12, 0.53, 0.90, 1)
+            self.ids.btn_chart_weekly.text_color = (1, 1, 1, 1)
+            self.ids.btn_chart_weekly.elevation = 1
+            self.ids.btn_chart_monthly.md_bg_color = (0.85, 0.88, 0.92, 1)
+            self.ids.btn_chart_monthly.text_color = (0.3, 0.3, 0.3, 1)
+            self.ids.btn_chart_monthly.elevation = 0
+            self.ids.chart_title_label.text = "Tugas Selesai (7 Hari Terakhir)"
+        else:
+            self.ids.btn_chart_monthly.md_bg_color = (0.12, 0.53, 0.90, 1)
+            self.ids.btn_chart_monthly.text_color = (1, 1, 1, 1)
+            self.ids.btn_chart_monthly.elevation = 1
+            self.ids.btn_chart_weekly.md_bg_color = (0.85, 0.88, 0.92, 1)
+            self.ids.btn_chart_weekly.text_color = (0.3, 0.3, 0.3, 1)
+            self.ids.btn_chart_weekly.elevation = 0
+            self.ids.chart_title_label.text = "Tugas Selesai (4 Minggu Terakhir)"
+        self.load_chart_data()
 
     def on_search_text_change(self, text):
         self.search_query = text.strip()
@@ -329,7 +349,6 @@ class MainScreen(Screen):
                             d_dt = datetime.strptime(deadline_str, "%Y-%m-%d").replace(hour=23, minute=59)
 
                         dl_display_time = d_dt.strftime('%H:%M')
-                        # REVISI 3: Format tampilan tanggal deadline diubah menjadi DD-MM-YYYY
                         dl_display_date = d_dt.strftime('%d-%m-%Y')
 
                         if d_dt < now:
@@ -347,7 +366,6 @@ class MainScreen(Screen):
                     except Exception:
                         pass
 
-                # Tombol Edit (Pencil) & Hapus
                 edit_btn = MDIconButton(
                     icon="pencil-outline",
                     theme_icon_color="Custom",
@@ -386,7 +404,7 @@ class MainScreen(Screen):
         self.load_tasks()
         self.load_history()
         self.update_streak()
-        self.load_weekly_chart()
+        self.load_chart_data()
         self.load_user_stats()
 
     def delete_task(self, task_id):
@@ -424,7 +442,6 @@ class MainScreen(Screen):
                 judul = h[1]
                 tgl = h[3] if len(h) >= 4 else "-"
 
-                # REVISI 3: Format tanggal riwayat menjadi DD-MM-YYYY
                 if tgl and tgl != "-":
                     try:
                         tgl_dt = datetime.strptime(tgl, "%Y-%m-%d")
@@ -493,7 +510,6 @@ class MainScreen(Screen):
                 judul = h[1]
                 tgl = h[3] if len(h) >= 4 else "-"
                 
-                # REVISI 3: Format tanggal riwayat menjadi DD-MM-YYYY
                 if tgl and tgl != "-":
                     try:
                         tgl_dt = datetime.strptime(tgl, "%Y-%m-%d")
@@ -548,7 +564,7 @@ class MainScreen(Screen):
         database.delete_task(task_id)
         self.load_history()
         self.update_streak()
-        self.load_weekly_chart()
+        self.load_chart_data()
         self.load_user_stats()
 
     def update_streak(self):
@@ -571,12 +587,35 @@ class MainScreen(Screen):
 
         self.ids.streak_label.text = f"{streak} Hari Beruntun"
 
-    def load_weekly_chart(self):
+    def load_chart_data(self):
         self.ids.chart_container.clear_widgets()
         app = MDApp.get_running_app()
-        weekly_data = database.get_weekly_completed_counts(app.current_user_id)
+        
+        if self.chart_mode == "weekly":
+            chart_data = database.get_weekly_completed_counts(app.current_user_id)
+        else:
+            chart_data = database.get_monthly_completed_counts(app.current_user_id)
 
-        for day, cnt in weekly_data:
+        total_activity = sum(cnt for _, cnt in chart_data)
+
+        if total_activity == 0:
+            empty_box = MDBoxLayout(
+                orientation="vertical",
+                spacing="4dp",
+                size_hint=(1, 1),
+                pos_hint={"center_x": 0.5, "center_y": 0.5}
+            )
+            lbl_empty = MDLabel(
+                text="Belum ada aktivitas tercatat pada periode ini",
+                halign="center",
+                font_style="Caption",
+                theme_text_color="Secondary"
+            )
+            empty_box.add_widget(lbl_empty)
+            self.ids.chart_container.add_widget(empty_box)
+            return
+
+        for label_text, cnt in chart_data:
             col = MDBoxLayout(orientation="vertical", spacing="4dp")
 
             val_label = MDLabel(text=str(cnt), font_style="Caption", halign="center", theme_text_color="Secondary", size_hint_y=None, height="14dp")
@@ -591,11 +630,11 @@ class MainScreen(Screen):
                 pos_hint={"center_x": 0.5}
             )
 
-            day_label = MDLabel(text=day, font_style="Caption", halign="center", bold=True, theme_text_color="Primary", size_hint_y=None, height="14dp")
+            desc_label = MDLabel(text=label_text, font_style="Caption", halign="center", bold=True, theme_text_color="Primary", size_hint_y=None, height="14dp")
 
             col.add_widget(val_label)
             col.add_widget(bar_card)
-            col.add_widget(day_label)
+            col.add_widget(desc_label)
 
             self.ids.chart_container.add_widget(col)
 
@@ -853,7 +892,29 @@ class MainScreen(Screen):
         self.manager.get_screen("edit_profile").setup_data()
         self.manager.current = "edit_profile"
 
-    def do_logout(self):
+    def open_logout_confirmation(self):
+        self.logout_dialog = MDDialog(
+            title="Konfirmasi Keluar",
+            text="Apakah Anda yakin ingin keluar dari akun ini?",
+            buttons=[
+                MDFlatButton(
+                    text="Batal",
+                    theme_text_color="Custom",
+                    text_color=(0.3, 0.3, 0.3, 1),
+                    on_release=lambda x: self.logout_dialog.dismiss()
+                ),
+                MDRaisedButton(
+                    text="Ya, Keluar",
+                    md_bg_color=(0.88, 0.2, 0.2, 1),
+                    on_release=lambda x: self.execute_logout()
+                )
+            ]
+        )
+        self.logout_dialog.open()
+
+    def execute_logout(self):
+        if self.logout_dialog:
+            self.logout_dialog.dismiss()
         app = MDApp.get_running_app()
         app.current_user_id = None
         app.current_user_nama = ""
