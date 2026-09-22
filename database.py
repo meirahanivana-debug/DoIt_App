@@ -14,11 +14,12 @@ def init_db():
             nama TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            avatar TEXT DEFAULT 'avatars/avatar1.png'
+            avatar TEXT DEFAULT 'avatars/avatar1.png',
+            created_at TEXT
         )
     ''')
     
-    # Tabel Tasks (Ditambahkan kolom deadline)
+    # Tabel Tasks
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,9 +44,14 @@ def init_db():
         )
     ''')
     
-    # Migrasi otomatis jika kolom deadline belum ada pada DB terdahulu
+    # Migrasi otomatis jika kolom deadline/created_at belum ada pada DB terdahulu
     try:
         cursor.execute("ALTER TABLE tasks ADD COLUMN deadline TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN created_at TEXT")
     except sqlite3.OperationalError:
         pass
 
@@ -56,7 +62,8 @@ def register_user(nama, email, password):
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO users (nama, email, password, avatar) VALUES (?, ?, ?, 'avatars/avatar1.png')", (nama, email, password))
+        now_str = datetime.now().strftime("%Y-%m-%d")
+        cursor.execute("INSERT INTO users (nama, email, password, avatar, created_at) VALUES (?, ?, ?, 'avatars/avatar1.png', ?)", (nama, email, password, now_str))
         user_id = cursor.lastrowid
 
         default_cats = ["Sekolah", "Kuliah", "Pekerjaan", "Pribadi", "Kesehatan"]
@@ -72,7 +79,7 @@ def register_user(nama, email, password):
 def verify_user(email, password):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nama, email, password, COALESCE(avatar, 'avatars/avatar1.png') FROM users WHERE email = ? AND password = ?", (email, password))
+    cursor.execute("SELECT id, nama, email, password, COALESCE(avatar, 'avatars/avatar1.png'), COALESCE(created_at, '-') FROM users WHERE email = ? AND password = ?", (email, password))
     user = cursor.fetchone()
     conn.close()
     return user
@@ -119,15 +126,29 @@ def delete_category(cat_id):
     conn.close()
 
 # --- Kelola Tugas & Statistik ---
-def get_tasks_by_user(user_id, tipe):
+def get_tasks_by_user(user_id, tipe, sort_by="default", search_query=""):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("""
+    
+    query = """
         SELECT id, user_id, judul, kategori, tipe, status, tanggal_selesai, deadline 
         FROM tasks 
         WHERE user_id = ? AND tipe = ? AND status = 'Belum'
-        ORDER BY id DESC
-    """, (user_id, tipe))
+    """
+    params = [user_id, tipe]
+
+    if search_query:
+        query += " AND judul LIKE ?"
+        params.append(f"%{search_query}%")
+
+    if sort_by == "deadline":
+        query += " ORDER BY CASE WHEN deadline IS NULL OR deadline = '' THEN 1 ELSE 0 END, deadline ASC"
+    elif sort_by == "alphabet":
+        query += " ORDER BY judul ASC"
+    else:
+        query += " ORDER BY id DESC"
+
+    cursor.execute(query, tuple(params))
     rows = cursor.fetchall()
     conn.close()
     return rows
@@ -139,6 +160,17 @@ def add_task(user_id, judul, kategori, tipe, deadline=None):
         INSERT INTO tasks (user_id, judul, kategori, tipe, status, deadline) 
         VALUES (?, ?, ?, ?, 'Belum', ?)
     """, (user_id, judul, kategori, tipe, deadline))
+    conn.commit()
+    conn.close()
+
+def update_task(task_id, judul, kategori, deadline=None):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE tasks 
+        SET judul = ?, kategori = ?, deadline = ? 
+        WHERE id = ?
+    """, (judul, kategori, deadline, task_id))
     conn.commit()
     conn.close()
 
@@ -157,7 +189,6 @@ def delete_task(task_id):
     conn.commit()
     conn.close()
 
-# REVISI 3: Dibatasi hanya 7 Hari Terakhir
 def get_completed_tasks_by_user(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -171,7 +202,6 @@ def get_completed_tasks_by_user(user_id):
     conn.close()
     return rows
 
-# REVISI 3: Opsi mengambil semua riwayat
 def get_all_completed_tasks_by_user(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()

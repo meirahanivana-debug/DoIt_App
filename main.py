@@ -10,6 +10,7 @@ from kivy.core.window import Window
 Window.size = (360, 640)
 
 from kivy.lang import Builder
+from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
@@ -21,7 +22,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconRightWidget
-from kivymd.uix.pickers import MDDatePicker
+from kivymd.uix.pickers import MDDatePicker, MDTimePicker
 
 
 class LoginScreen(Screen):
@@ -51,6 +52,7 @@ class LoginScreen(Screen):
                 app.current_user_email = user[2]
                 app.current_user_password = user[3]
                 app.current_user_avatar = user[4] if len(user) > 4 and user[4] else "avatars/avatar1.png"
+                app.current_user_created_at = user[5] if len(user) > 5 and user[5] else "-"
 
                 self.manager.get_screen("main").setup_user_data()
                 self.manager.current = "main"
@@ -133,9 +135,14 @@ class MainScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.current_filter = "Tugas"
+        self.sort_by = "default"
+        self.search_query = ""
         self.dialog = None
         self.category_menu = None
-        self.selected_deadline = None
+        self.sort_menu = None
+        self.selected_date = None
+        self.selected_time = None
+        self.editing_task_id = None
 
     def setup_user_data(self):
         app = MDApp.get_running_app()
@@ -154,14 +161,34 @@ class MainScreen(Screen):
         self.ids.profile_nama.text = app.current_user_nama
         self.ids.profile_email.text = app.current_user_email
         self.ids.profile_avatar_img.source = app.current_user_avatar if app.current_user_avatar else "avatars/avatar1.png"
+        
+        # REVISI 3: Format tanggal bergabung menjadi DD-MM-YYYY
+        created_at_val = app.current_user_created_at
+        if created_at_val and created_at_val != "-":
+            try:
+                dt_created = datetime.strptime(created_at_val, "%Y-%m-%d")
+                created_at_val = dt_created.strftime("%d-%m-%Y")
+            except Exception:
+                pass
+        self.ids.profile_created_at.text = f"Bergabung: {created_at_val}"
+        
         self.ids.date_label.text = datetime.now().strftime("%d %b %Y")
 
+        self.apply_header_color()
         self.switch_tab("tab_beranda")
         self.load_tasks()
         self.load_history()
         self.update_streak()
         self.load_weekly_chart()
         self.load_user_stats()
+
+    def apply_header_color(self):
+        header_color = (0.12, 0.53, 0.90, 1)
+        self.ids.main_header.md_bg_color = header_color
+        
+        edit_screen = self.manager.get_screen("edit_profile") if self.manager else None
+        if edit_screen and "edit_profile_header" in edit_screen.ids:
+            edit_screen.ids.edit_profile_header.md_bg_color = header_color
 
     def switch_tab(self, tab_name):
         self.ids.main_sm.current = tab_name
@@ -180,38 +207,87 @@ class MainScreen(Screen):
             self.ids.nav_profile.icon_color = blue
 
     def load_user_stats(self):
-        app = MDApp.get_running_app()
-        total, completed = database.get_user_stats(app.current_user_id)
-        
-        if total > 0:
-            percentage = int((completed / total) * 100)
-        else:
-            percentage = 0
-
-        self.ids.stat_progress_bar.value = percentage
-        self.ids.stat_percent_label.text = f"{percentage}%"
-        self.ids.stat_summary_label.text = f"{completed} dari {total} tugas selesai"
+        # REVISI 4: Menghapus logika akses ID widget stat_progress_bar / stat_percent_label / stat_summary_label
+        pass
 
     def switch_filter(self, filter_type):
         self.current_filter = filter_type
         if filter_type == "Tugas":
             self.ids.btn_tugas.md_bg_color = (0.12, 0.53, 0.90, 1)
             self.ids.btn_tugas.text_color = (1, 1, 1, 1)
+            self.ids.btn_tugas.elevation = 2
             self.ids.btn_kebiasaan.md_bg_color = (0.85, 0.88, 0.92, 1)
             self.ids.btn_kebiasaan.text_color = (0.3, 0.3, 0.3, 1)
+            self.ids.btn_kebiasaan.elevation = 0
         else:
             self.ids.btn_kebiasaan.md_bg_color = (0.12, 0.53, 0.90, 1)
             self.ids.btn_kebiasaan.text_color = (1, 1, 1, 1)
+            self.ids.btn_kebiasaan.elevation = 2
             self.ids.btn_tugas.md_bg_color = (0.85, 0.88, 0.92, 1)
             self.ids.btn_tugas.text_color = (0.3, 0.3, 0.3, 1)
+            self.ids.btn_tugas.elevation = 0
+        self.load_tasks()
+
+    def on_search_text_change(self, text):
+        self.search_query = text.strip()
+        self.load_tasks()
+
+    def open_sort_menu(self, instance):
+        menu_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Terbaru (Default)",
+                "on_release": lambda x="default": self.set_sort_option(x),
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Deadline Terdekat",
+                "on_release": lambda x="deadline": self.set_sort_option(x),
+            },
+            {
+                "viewclass": "OneLineListItem",
+                "text": "Abjad (A-Z)",
+                "on_release": lambda x="alphabet": self.set_sort_option(x),
+            },
+        ]
+        self.sort_menu = MDDropdownMenu(
+            caller=instance,
+            items=menu_items,
+            width_mult=4,
+        )
+        self.sort_menu.open()
+
+    def set_sort_option(self, option):
+        self.sort_by = option
+        if self.sort_menu:
+            self.sort_menu.dismiss()
         self.load_tasks()
 
     def load_tasks(self):
         self.ids.task_list.clear_widgets()
         app = MDApp.get_running_app()
-        tasks = database.get_tasks_by_user(app.current_user_id, self.current_filter)
+        tasks = database.get_tasks_by_user(app.current_user_id, self.current_filter, self.sort_by, self.search_query)
 
-        today = datetime.now().date()
+        if not tasks:
+            empty_box = MDBoxLayout(orientation="vertical", spacing="6dp", size_hint_y=None, height="140dp", pos_hint={"center_x": 0.5})
+            icon_empty = MDIconButton(
+                icon="playlist-remove",
+                theme_icon_color="Custom",
+                icon_color=(0.6, 0.6, 0.6, 1),
+                pos_hint={"center_x": 0.5}
+            )
+            lbl_empty = MDLabel(
+                text="Belum ada aktivitas tercatat",
+                halign="center",
+                font_style="Body2",
+                theme_text_color="Secondary"
+            )
+            empty_box.add_widget(icon_empty)
+            empty_box.add_widget(lbl_empty)
+            self.ids.task_list.add_widget(empty_box)
+            return
+
+        now = datetime.now()
 
         for task in tasks:
             try:
@@ -222,10 +298,10 @@ class MainScreen(Screen):
 
                 card = MDCard(
                     size_hint=(1, None),
-                    height="68dp" if deadline_str else "60dp",
+                    height="78dp" if deadline_str else "70dp",
                     elevation=1,
                     radius=[12],
-                    padding=["10dp", "4dp", "10dp", "4dp"],
+                    padding=["12dp", "6dp", "12dp", "6dp"],
                     md_bg_color=app.theme_cls.bg_light
                 )
 
@@ -237,9 +313,9 @@ class MainScreen(Screen):
                     icon_color=(0.5, 0.5, 0.5, 1),
                     pos_hint={"center_y": 0.5}
                 )
-                chk_btn.bind(on_release=lambda x, tid=t_id: self.mark_done(tid))
+                chk_btn.bind(on_release=lambda btn, tid=t_id: self.mark_done_with_anim(btn, tid))
 
-                text_box = MDBoxLayout(orientation="vertical", pos_hint={"center_y": 0.5})
+                text_box = MDBoxLayout(orientation="vertical", spacing="4dp", pos_hint={"center_y": 0.5})
                 text_box.add_widget(MDLabel(text=str(judul), bold=True, font_style="Subtitle2", theme_text_color="Primary"))
                 
                 sub_info = f"Kategori: {kategori}"
@@ -247,21 +323,38 @@ class MainScreen(Screen):
 
                 if deadline_str:
                     try:
-                        d_date = datetime.strptime(deadline_str, "%Y-%m-%d").date()
-                        if d_date < today:
+                        if len(deadline_str) > 10:
+                            d_dt = datetime.strptime(deadline_str, "%Y-%m-%d %H:%M")
+                        else:
+                            d_dt = datetime.strptime(deadline_str, "%Y-%m-%d").replace(hour=23, minute=59)
+
+                        dl_display_time = d_dt.strftime('%H:%M')
+                        # REVISI 3: Format tampilan tanggal deadline diubah menjadi DD-MM-YYYY
+                        dl_display_date = d_dt.strftime('%d-%m-%Y')
+
+                        if d_dt < now:
                             d_color = (0.85, 0.1, 0.1, 1)
-                            txt_dl = f"Deadline: {deadline_str} (Terlewat)"
-                        elif d_date == today:
+                            txt_dl = f"Deadline: {dl_display_date} {dl_display_time} (Terlewat)"
+                        elif d_dt.date() == now.date():
                             d_color = (0.9, 0.5, 0.0, 1)
-                            txt_dl = f"Deadline: Hari Ini"
+                            txt_dl = f"Deadline: Hari Ini ({dl_display_time})"
                         else:
                             d_color = (0.12, 0.53, 0.90, 1)
-                            txt_dl = f"Deadline: {deadline_str}"
+                            txt_dl = f"Deadline: {dl_display_date} {dl_display_time}"
 
                         lbl_dl = MDLabel(text=txt_dl, font_style="Caption", bold=True, theme_text_color="Custom", text_color=d_color)
                         text_box.add_widget(lbl_dl)
                     except Exception:
                         pass
+
+                # Tombol Edit (Pencil) & Hapus
+                edit_btn = MDIconButton(
+                    icon="pencil-outline",
+                    theme_icon_color="Custom",
+                    icon_color=(0.12, 0.53, 0.90, 1),
+                    pos_hint={"center_y": 0.5}
+                )
+                edit_btn.bind(on_release=lambda x, t_data=task: self.open_edit_task_dialog(t_data))
 
                 del_btn = MDIconButton(
                     icon="trash-can-outline",
@@ -273,6 +366,7 @@ class MainScreen(Screen):
 
                 layout.add_widget(chk_btn)
                 layout.add_widget(text_box)
+                layout.add_widget(edit_btn)
                 layout.add_widget(del_btn)
 
                 card.add_widget(layout)
@@ -280,7 +374,14 @@ class MainScreen(Screen):
             except Exception:
                 continue
 
-    def mark_done(self, task_id):
+    def mark_done_with_anim(self, icon_button, task_id):
+        icon_button.disabled = True
+        icon_button.icon = "check-circle"
+        icon_button.icon_color = (0.2, 0.7, 0.3, 1)
+
+        Clock.schedule_once(lambda dt: self.execute_mark_done(task_id), 0.3)
+
+    def execute_mark_done(self, task_id):
         database.update_task_status(task_id, "Selesai")
         self.load_tasks()
         self.load_history()
@@ -298,11 +399,38 @@ class MainScreen(Screen):
         app = MDApp.get_running_app()
         history = database.get_completed_tasks_by_user(app.current_user_id)
 
+        if not history:
+            empty_box = MDBoxLayout(orientation="vertical", spacing="4dp", size_hint_y=None, height="100dp", pos_hint={"center_x": 0.5})
+            icon_empty = MDIconButton(
+                icon="chart-timeline-variant-off",
+                theme_icon_color="Custom",
+                icon_color=(0.6, 0.6, 0.6, 1),
+                pos_hint={"center_x": 0.5}
+            )
+            lbl_empty = MDLabel(
+                text="Belum ada riwayat aktivitas",
+                halign="center",
+                font_style="Caption",
+                theme_text_color="Secondary"
+            )
+            empty_box.add_widget(icon_empty)
+            empty_box.add_widget(lbl_empty)
+            self.ids.history_list.add_widget(empty_box)
+            return
+
         for h in history:
             try:
                 t_id = h[0]
                 judul = h[1]
                 tgl = h[3] if len(h) >= 4 else "-"
+
+                # REVISI 3: Format tanggal riwayat menjadi DD-MM-YYYY
+                if tgl and tgl != "-":
+                    try:
+                        tgl_dt = datetime.strptime(tgl, "%Y-%m-%d")
+                        tgl = tgl_dt.strftime("%d-%m-%Y")
+                    except Exception:
+                        pass
 
                 card = MDCard(
                     size_hint=(1, None),
@@ -364,6 +492,14 @@ class MainScreen(Screen):
             for h in all_history:
                 judul = h[1]
                 tgl = h[3] if len(h) >= 4 else "-"
+                
+                # REVISI 3: Format tanggal riwayat menjadi DD-MM-YYYY
+                if tgl and tgl != "-":
+                    try:
+                        tgl_dt = datetime.strptime(tgl, "%Y-%m-%d")
+                        tgl = tgl_dt.strftime("%d-%m-%Y")
+                    except Exception:
+                        pass
                 
                 card = MDCard(
                     size_hint=(1, None),
@@ -441,7 +577,7 @@ class MainScreen(Screen):
         weekly_data = database.get_weekly_completed_counts(app.current_user_id)
 
         for day, cnt in weekly_data:
-            col = MDBoxLayout(orientation="vertical", spacing="4dp", alignment_vertical="bottom")
+            col = MDBoxLayout(orientation="vertical", spacing="4dp")
 
             val_label = MDLabel(text=str(cnt), font_style="Caption", halign="center", theme_text_color="Secondary", size_hint_y=None, height="14dp")
             calculated_height = max(10, min(100, cnt * 8))
@@ -464,15 +600,43 @@ class MainScreen(Screen):
             self.ids.chart_container.add_widget(col)
 
     def show_add_task_dialog(self):
+        self.editing_task_id = None
+        self._build_task_dialog(title=f"Tambah {self.current_filter}")
+
+    def open_edit_task_dialog(self, task_data):
+        self.editing_task_id = task_data[0]
+        judul = task_data[2]
+        kategori = task_data[3]
+        deadline_str = task_data[7] if len(task_data) > 7 else None
+
+        d_str = ""
+        t_str = ""
+        if deadline_str:
+            parts = deadline_str.split(" ")
+            d_str = parts[0]
+            if len(parts) > 1:
+                t_str = parts[1]
+
+        self._build_task_dialog(
+            title=f"Edit {self.current_filter}",
+            init_judul=judul,
+            init_kategori=kategori,
+            init_date=d_str,
+            init_time=t_str
+        )
+
+    def _build_task_dialog(self, title, init_judul="", init_kategori="", init_date="", init_time=""):
         app = MDApp.get_running_app()
         user_cats = database.get_user_categories(app.current_user_id)
-        first_cat = user_cats[0][1] if user_cats else "Umum"
-        self.selected_deadline = None
+        default_cat = init_kategori if init_kategori else (user_cats[0][1] if user_cats else "Umum")
+        
+        self.selected_date = init_date if init_date else None
+        self.selected_time = init_time if init_time else None
 
-        self.input_judul = MDTextField(hint_text="Nama Tugas / Kebiasaan")
+        self.input_judul = MDTextField(hint_text="Nama Tugas / Kebiasaan", text=init_judul)
         self.input_kategori = MDTextField(
             hint_text="Pilih Kategori",
-            text=first_cat,
+            text=default_cat,
             readonly=True
         )
         
@@ -495,27 +659,42 @@ class MainScreen(Screen):
         kat_box.add_widget(btn_drop)
         kat_box.add_widget(btn_manage_cat)
 
-        self.input_deadline = MDTextField(
-            hint_text="Batas Waktu (Opsional)",
+        self.input_date = MDTextField(
+            hint_text="Tanggal Deadline",
+            text=init_date,
             readonly=True
         )
-        btn_picker = MDIconButton(
+        btn_date_picker = MDIconButton(
             icon="calendar",
             pos_hint={"center_y": 0.5},
             on_release=self.open_date_picker
         )
+        date_box = MDBoxLayout(orientation="horizontal", spacing="4dp")
+        date_box.add_widget(self.input_date)
+        date_box.add_widget(btn_date_picker)
 
-        dl_box = MDBoxLayout(orientation="horizontal", spacing="4dp")
-        dl_box.add_widget(self.input_deadline)
-        dl_box.add_widget(btn_picker)
+        self.input_time = MDTextField(
+            hint_text="Jam Deadline (Opsional)",
+            text=init_time,
+            readonly=True
+        )
+        btn_time_picker = MDIconButton(
+            icon="clock-outline",
+            pos_hint={"center_y": 0.5},
+            on_release=self.open_time_picker
+        )
+        time_box = MDBoxLayout(orientation="horizontal", spacing="4dp")
+        time_box.add_widget(self.input_time)
+        time_box.add_widget(btn_time_picker)
 
-        content = MDBoxLayout(orientation="vertical", spacing="10dp", size_hint_y=None, height="180dp")
+        content = MDBoxLayout(orientation="vertical", spacing="10dp", size_hint_y=None, height="240dp")
         content.add_widget(self.input_judul)
         content.add_widget(kat_box)
-        content.add_widget(dl_box)
+        content.add_widget(date_box)
+        content.add_widget(time_box)
 
         self.dialog = MDDialog(
-            title=f"Tambah {self.current_filter}",
+            title=title,
             type="custom",
             content_cls=content,
             buttons=[
@@ -535,8 +714,27 @@ class MainScreen(Screen):
         date_dialog.open()
 
     def on_date_save(self, instance, value, date_range):
-        self.selected_deadline = value.strftime("%Y-%m-%d")
-        self.input_deadline.text = self.selected_deadline
+        self.selected_date = value.strftime("%Y-%m-%d")
+        self.input_date.text = self.selected_date
+
+    def open_time_picker(self, instance):
+        time_dialog = MDTimePicker()
+        time_dialog.bind(on_save=self.on_time_save)
+        time_dialog.open()
+
+    def on_time_save(self, instance, time_obj):
+        try:
+            if hasattr(time_obj, 'hour') and hasattr(time_obj, 'minute'):
+                formatted_time = f"{time_obj.hour:02d}:{time_obj.minute:02d}"
+            elif hasattr(time_obj, 'strftime'):
+                formatted_time = time_obj.strftime("%H:%M")
+            else:
+                formatted_time = str(time_obj)[:5]
+        except Exception:
+            formatted_time = str(time_obj)
+
+        self.selected_time = formatted_time
+        self.input_time.text = self.selected_time
 
     def open_category_menu(self, instance):
         app = MDApp.get_running_app()
@@ -546,6 +744,7 @@ class MainScreen(Screen):
             {
                 "viewclass": "OneLineListItem",
                 "text": cat[1],
+                "theme_text_color": "Primary",
                 "on_release": lambda x=cat[1]: self.set_category(x),
             } for cat in user_cats
         ]
@@ -564,12 +763,30 @@ class MainScreen(Screen):
     def save_task(self):
         judul = self.input_judul.text.strip()
         kategori = self.input_kategori.text.strip()
+        
+        date_part = self.input_date.text.strip()
+        time_part = self.input_time.text.strip()
+
+        if time_part and not date_part:
+            date_part = datetime.now().strftime("%Y-%m-%d")
+
+        if date_part and time_part:
+            deadline = f"{date_part} {time_part}"
+        elif date_part:
+            deadline = date_part
+        else:
+            deadline = None
+
         if not kategori:
             kategori = "Umum"
 
         if judul:
             app = MDApp.get_running_app()
-            database.add_task(app.current_user_id, judul, kategori, self.current_filter, self.selected_deadline)
+            if self.editing_task_id:
+                database.update_task(self.editing_task_id, judul, kategori, deadline)
+            else:
+                database.add_task(app.current_user_id, judul, kategori, self.current_filter, deadline)
+            
             self.dialog.dismiss()
             self.load_tasks()
             self.load_user_stats()
@@ -636,13 +853,6 @@ class MainScreen(Screen):
         self.manager.get_screen("edit_profile").setup_data()
         self.manager.current = "edit_profile"
 
-    # PERBAIKAN: Perubahan tema dinamis tanpa merusak susunan antarmuka
-    def toggle_theme(self, switch_active):
-        app = MDApp.get_running_app()
-        app.theme_cls.theme_style = "Dark" if switch_active else "Light"
-        self.load_tasks()
-        self.load_history()
-
     def do_logout(self):
         app = MDApp.get_running_app()
         app.current_user_id = None
@@ -650,6 +860,7 @@ class MainScreen(Screen):
         app.current_user_email = ""
         app.current_user_password = ""
         app.current_user_avatar = "avatars/avatar1.png"
+        app.current_user_created_at = "-"
         self.manager.current = "login"
 
 
@@ -738,11 +949,13 @@ class EditProfileScreen(Screen):
 class DoItApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Blue"
+        self.theme_cls.theme_style = "Light"
         self.current_user_id = None
         self.current_user_nama = ""
         self.current_user_email = ""
         self.current_user_password = ""
         self.current_user_avatar = "avatars/avatar1.png"
+        self.current_user_created_at = "-"
 
         database.init_db()
         return Builder.load_file("doit.kv")

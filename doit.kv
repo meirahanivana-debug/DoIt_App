@@ -16,7 +16,7 @@ ScreenManager:
             size_hint: 0.88, None
             height: "470dp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            elevation: 2
+            elevation: 1
             radius: [20]
             padding: ["20dp", "24dp", "20dp", "20dp"]
             md_bg_color: app.theme_cls.bg_light
@@ -90,7 +90,7 @@ ScreenManager:
             size_hint: 0.88, None
             height: "510dp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            elevation: 2
+            elevation: 1
             radius: [20]
             padding: ["20dp", "20dp", "20dp", "20dp"]
             md_bg_color: app.theme_cls.bg_light
@@ -156,8 +156,9 @@ ScreenManager:
     MDFloatLayout:
         md_bg_color: app.theme_cls.bg_normal
 
-        # Header Atas (Disesuaikan Spacing & Jarak Teks)
+        # Header Atas
         MDBoxLayout:
+            id: main_header
             orientation: "vertical"
             size_hint: (1, None)
             height: "128dp"
@@ -238,6 +239,29 @@ ScreenManager:
                     padding: ["16dp", "10dp", "16dp", "10dp"]
                     spacing: "10dp"
 
+                    # REVISI 1: Search & Sort Bar Dipindah ke Atas Filter
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "42dp"
+                        spacing: "8dp"
+
+                        MDTextField:
+                            id: search_field
+                            hint_text: "Cari tugas..."
+                            icon_left: "magnify"
+                            mode: "rectangle"
+                            on_text: root.on_search_text_change(self.text)
+
+                        MDIconButton:
+                            id: sort_btn
+                            icon: "sort-variant"
+                            theme_icon_color: "Custom"
+                            icon_color: 0.12, 0.53, 0.90, 1
+                            pos_hint: {"center_y": 0.5}
+                            on_release: root.open_sort_menu(self)
+
+                    # Tombol Filter Tugas & Kebiasaan
                     MDBoxLayout:
                         orientation: "horizontal"
                         size_hint_y: None
@@ -248,6 +272,7 @@ ScreenManager:
                             id: btn_tugas
                             text: "Tugas"
                             size_hint_x: 0.5
+                            elevation: 2
                             md_bg_color: 0.12, 0.53, 0.90, 1
                             text_color: 1, 1, 1, 1
                             on_release: root.switch_filter("Tugas")
@@ -256,6 +281,7 @@ ScreenManager:
                             id: btn_kebiasaan
                             text: "Kebiasaan"
                             size_hint_x: 0.5
+                            elevation: 0
                             md_bg_color: 0.85, 0.88, 0.92, 1
                             text_color: 0.3, 0.3, 0.3, 1
                             on_release: root.switch_filter("Kebiasaan")
@@ -366,32 +392,30 @@ ScreenManager:
                         size_hint_y: None
                         height: self.minimum_height
 
-                        # Header Profil & Avatar
                         MDCard:
                             size_hint: (1, None)
-                            height: "140dp"
+                            height: "165dp"
                             radius: [14]
-                            padding: "10dp"
+                            padding: ["16dp", "12dp", "16dp", "12dp"]
                             md_bg_color: app.theme_cls.bg_light
                             elevation: 1
 
                             MDBoxLayout:
                                 orientation: "vertical"
-                                alignment_vertical: "center"
                                 pos_hint: {"center_x": 0.5}
                                 spacing: "4dp"
 
                                 MDCard:
                                     size_hint: None, None
-                                    size: "50dp", "50dp"
-                                    radius: [25]
+                                    size: "48dp", "48dp"
+                                    radius: [24]
                                     pos_hint: {"center_x": 0.5}
                                     elevation: 0
 
                                     FitImage:
                                         id: profile_avatar_img
                                         source: "avatars/avatar1.png"
-                                        radius: [25]
+                                        radius: [24]
 
                                 MDLabel:
                                     id: profile_nama
@@ -408,6 +432,15 @@ ScreenManager:
                                     theme_text_color: "Secondary"
                                     halign: "center"
 
+                                # REVISI 2: Menghapus Chip "Akun Aktif" & Mengetengahkan Tanggal Bergabung
+                                MDLabel:
+                                    id: profile_created_at
+                                    text: "Bergabung: -"
+                                    font_style: "Caption"
+                                    theme_text_color: "Hint"
+                                    halign: "center"
+                                    pos_hint: {"center_x": 0.5}
+
                                 MDFlatButton:
                                     text: "Edit Profil"
                                     theme_text_color: "Custom"
@@ -415,50 +448,8 @@ ScreenManager:
                                     pos_hint: {"center_x": 0.5}
                                     on_release: root.open_edit_profile()
 
-                        # Progress Bar Penyelesaian Tugas
-                        MDCard:
-                            size_hint: (1, None)
-                            height: "85dp"
-                            radius: [14]
-                            padding: ["14dp", "10dp", "14dp", "10dp"]
-                            md_bg_color: app.theme_cls.bg_light
-                            elevation: 1
+                        # REVISI 4: Menghapus MDCard "Progres Hari Ini" sepenuhnya dari layout profil
 
-                            MDBoxLayout:
-                                orientation: "vertical"
-                                spacing: "6dp"
-
-                                MDBoxLayout:
-                                    orientation: "horizontal"
-                                    MDLabel:
-                                        text: "Progres Hari Ini"
-                                        font_style: "Subtitle2"
-                                        bold: True
-                                        theme_text_color: "Primary"
-                                    MDLabel:
-                                        id: stat_percent_label
-                                        text: "0%"
-                                        font_style: "Subtitle2"
-                                        bold: True
-                                        halign: "right"
-                                        theme_text_color: "Custom"
-                                        text_color: 0.12, 0.53, 0.90, 1
-
-                                MDProgressBar:
-                                    id: stat_progress_bar
-                                    value: 0
-                                    max: 100
-                                    color: 0.12, 0.53, 0.90, 1
-                                    size_hint_y: None
-                                    height: "8dp"
-
-                                MDLabel:
-                                    id: stat_summary_label
-                                    text: "0 dari 0 tugas selesai"
-                                    font_style: "Caption"
-                                    theme_text_color: "Secondary"
-
-                        # Lencana Pencapaian
                         MDCard:
                             size_hint: (1, None)
                             height: "90dp"
@@ -507,10 +498,9 @@ ScreenManager:
                                             text: "Master"
                                             icon: "crown"
 
-                        # Pengaturan Aplikasi
                         MDCard:
                             size_hint: (1, None)
-                            height: "130dp"
+                            height: "80dp"
                             radius: [14]
                             padding: "12dp"
                             md_bg_color: app.theme_cls.bg_light
@@ -537,20 +527,6 @@ ScreenManager:
                                         active: True
                                         pos_hint: {"center_y": 0.5}
 
-                                MDBoxLayout:
-                                    orientation: "horizontal"
-                                    MDLabel:
-                                        text: "Mode Gelap"
-                                        font_style: "Body2"
-                                        theme_text_color: "Primary"
-                                        pos_hint: {"center_y": 0.5}
-                                    MDSwitch:
-                                        id: dark_mode_switch
-                                        active: app.theme_cls.theme_style == "Dark"
-                                        pos_hint: {"center_y": 0.5}
-                                        on_active: root.toggle_theme(self.active)
-
-                        # Logout & Footer
                         MDRaisedButton:
                             text: "KELUAR (LOGOUT)"
                             size_hint_x: 1
@@ -564,19 +540,17 @@ ScreenManager:
                             theme_text_color: "Hint"
                             halign: "center"
 
-        # Tombol Tambah FAB
         MDFloatingActionButton:
             icon: "plus"
             md_bg_color: 0.12, 0.53, 0.90, 1
             pos_hint: {"right": 0.9, "y": 0.11}
             on_release: root.show_add_task_dialog()
 
-        # Navigasi Bawah
         MDCard:
             size_hint: (1, None)
             height: "56dp"
             pos_hint: {"bottom": 1}
-            elevation: 8
+            elevation: 1
             radius: [0, 0, 0, 0]
             md_bg_color: app.theme_cls.bg_light
 
@@ -612,8 +586,8 @@ ScreenManager:
     MDFloatLayout:
         md_bg_color: app.theme_cls.bg_normal
 
-        # Header Bar Edit Profil
         MDBoxLayout:
+            id: edit_profile_header
             orientation: "vertical"
             size_hint: (1, None)
             height: "56dp"
