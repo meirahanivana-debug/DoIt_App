@@ -22,6 +22,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
+            user_email TEXT,
             judul TEXT NOT NULL,
             kategori TEXT NOT NULL,
             tipe TEXT NOT NULL,
@@ -40,6 +41,13 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL
+        )
+    ''')
     
     try:
         cursor.execute("ALTER TABLE tasks ADD COLUMN deadline TEXT")
@@ -51,6 +59,34 @@ def init_db():
     except sqlite3.OperationalError:
         pass
 
+    try:
+        cursor.execute("ALTER TABLE tasks ADD COLUMN user_email TEXT")
+    except sqlite3.OperationalError:
+        pass
+
+    conn.commit()
+    conn.close()
+
+def save_session(email):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sessions")
+    cursor.execute("INSERT INTO sessions (email) VALUES (?)", (email,))
+    conn.commit()
+    conn.close()
+
+def get_active_session():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM sessions LIMIT 1")
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
+
+def clear_session():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sessions")
     conn.commit()
     conn.close()
 
@@ -76,6 +112,14 @@ def verify_user(email, password):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT id, nama, email, password, COALESCE(avatar, 'avatars/avatar1.png'), COALESCE(created_at, '-') FROM users WHERE email = ? AND password = ?", (email, password))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
+def get_user_by_email(email):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nama, email, password, COALESCE(avatar, 'avatars/avatar1.png'), COALESCE(created_at, '-') FROM users WHERE email = ?", (email,))
     user = cursor.fetchone()
     conn.close()
     return user
@@ -132,13 +176,13 @@ def get_tasks_by_user(user_id, tipe, sort_by="default", search_query=""):
     params = [user_id, tipe]
 
     if search_query:
-        query += " AND judul LIKE ?"
-        params.append(f"%{search_query}%")
+        query += " AND LOWER(judul) LIKE ?"
+        params.append(f"%{search_query.lower()}%")
 
     if sort_by == "deadline":
         query += " ORDER BY CASE WHEN deadline IS NULL OR deadline = '' THEN 1 ELSE 0 END, deadline ASC"
     elif sort_by == "alphabet":
-        query += " ORDER BY judul ASC"
+        query += " ORDER BY LOWER(judul) ASC"
     else:
         query += " ORDER BY id DESC"
 
@@ -147,13 +191,13 @@ def get_tasks_by_user(user_id, tipe, sort_by="default", search_query=""):
     conn.close()
     return rows
 
-def add_task(user_id, judul, kategori, tipe, deadline=None):
+def add_task(user_id, user_email, judul, kategori, tipe, deadline=None):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO tasks (user_id, judul, kategori, tipe, status, deadline) 
-        VALUES (?, ?, ?, ?, 'Belum', ?)
-    """, (user_id, judul, kategori, tipe, deadline))
+        INSERT INTO tasks (user_id, user_email, judul, kategori, tipe, status, deadline) 
+        VALUES (?, ?, ?, ?, ?, 'Belum', ?)
+    """, (user_id, user_email, judul, kategori, tipe, deadline))
     conn.commit()
     conn.close()
 
@@ -241,13 +285,23 @@ def get_weekly_completed_counts(user_id):
     cursor = conn.cursor()
     
     today = datetime.now().date()
-    counts = []
+    start_of_week = today - timedelta(days=today.weekday())
     
-    for i in range(6, -1, -1):
-        target_date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+    days_map = [
+        ("Sen", 0),
+        ("Sel", 1),
+        ("Rab", 2),
+        ("Kam", 3),
+        ("Jum", 4),
+        ("Sab", 5),
+        ("Min", 6)
+    ]
+    
+    counts = []
+    for day_name, offset in days_map:
+        target_date = (start_of_week + timedelta(days=offset)).strftime("%Y-%m-%d")
         cursor.execute("SELECT COUNT(*) FROM tasks WHERE user_id = ? AND status = 'Selesai' AND tanggal_selesai = ?", (user_id, target_date))
         cnt = cursor.fetchone()[0]
-        day_name = (today - timedelta(days=i)).strftime("%a")
         counts.append((day_name, cnt))
         
     conn.close()

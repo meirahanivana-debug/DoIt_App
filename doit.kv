@@ -1,4 +1,7 @@
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+
 ScreenManager:
+    transition: NoTransition()
     LoginScreen:
         name: "login"
     RegisterScreen:
@@ -17,7 +20,7 @@ ScreenManager:
             height: "470dp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             elevation: 1
-            radius: [20]
+            radius: [16, 16, 16, 16]
             padding: ["20dp", "24dp", "20dp", "20dp"]
             md_bg_color: app.theme_cls.bg_light
 
@@ -71,6 +74,7 @@ ScreenManager:
                     text: "MASUK"
                     size_hint_x: 1
                     height: "48dp"
+                    radius: [12, 12, 12, 12]
                     md_bg_color: 0.12, 0.53, 0.90, 1
                     on_release: root.do_login()
 
@@ -91,7 +95,7 @@ ScreenManager:
             height: "510dp"
             pos_hint: {"center_x": 0.5, "center_y": 0.5}
             elevation: 1
-            radius: [20]
+            radius: [16, 16, 16, 16]
             padding: ["20dp", "20dp", "20dp", "20dp"]
             md_bg_color: app.theme_cls.bg_light
 
@@ -141,6 +145,7 @@ ScreenManager:
                     text: "DAFTAR"
                     size_hint_x: 1
                     height: "48dp"
+                    radius: [12, 12, 12, 12]
                     md_bg_color: 0.12, 0.53, 0.90, 1
                     on_release: root.do_register()
 
@@ -189,7 +194,7 @@ ScreenManager:
                 MDCard:
                     size_hint: None, None
                     size: "90dp", "38dp"
-                    radius: [10]
+                    radius: [12, 12, 12, 12]
                     md_bg_color: 1, 1, 1, 0.9
                     elevation: 0
                     pos_hint: {"center_y": 0.5}
@@ -201,7 +206,7 @@ ScreenManager:
             MDCard:
                 size_hint: (None, None)
                 size: ("140dp", "26dp")
-                radius: [12]
+                radius: [12, 12, 12, 12]
                 md_bg_color: 1, 1, 1, 0.2
                 elevation: 0
 
@@ -224,16 +229,18 @@ ScreenManager:
                         pos_hint: {"center_y": 0.5}
 
         ScreenManager:
+            transition: NoTransition()
             id: main_sm
             size_hint: (1, None)
-            height: "450dp"
-            pos_hint: {"top": 0.80}
+            height: "584dp"
+            pos_hint: {"top": 1}
 
             Screen:
                 name: "tab_beranda"
+                md_bg_color: app.theme_cls.bg_normal
                 MDBoxLayout:
                     orientation: "vertical"
-                    padding: ["16dp", "10dp", "16dp", "10dp"]
+                    padding: ["16dp", "138dp", "16dp", "10dp"]
                     spacing: "16dp"
 
                     MDBoxLayout:
@@ -246,7 +253,8 @@ ScreenManager:
                             id: btn_tugas
                             text: "Tugas"
                             size_hint_x: 0.5
-                            elevation: 2
+                            elevation: 1
+                            radius: [12, 12, 12, 12]
                             md_bg_color: 0.12, 0.53, 0.90, 1
                             text_color: 1, 1, 1, 1
                             on_release: root.switch_filter("Tugas")
@@ -256,6 +264,7 @@ ScreenManager:
                             text: "Kebiasaan"
                             size_hint_x: 0.5
                             elevation: 0
+                            radius: [12, 12, 12, 12]
                             md_bg_color: 0.85, 0.88, 0.92, 1
                             text_color: 0.3, 0.3, 0.3, 1
                             on_release: root.switch_filter("Kebiasaan")
@@ -288,18 +297,20 @@ ScreenManager:
 
             Screen:
                 name: "tab_statistik"
+                md_bg_color: app.theme_cls.bg_normal
                 MDBoxLayout:
                     orientation: "vertical"
-                    padding: ["16dp", "10dp", "16dp", "10dp"]
+                    padding: ["16dp", "138dp", "16dp", "10dp"]
                     spacing: "10dp"
 
                     MDCard:
                         size_hint: (1, None)
                         height: "60dp"
-                        radius: [14]
+                        radius: [14, 14, 14, 14]
                         padding: ["16dp", "6dp", "16dp", "6dp"]
                         md_bg_color: app.theme_cls.bg_light
-                        elevation: 1
+                        elevation: 0.5
+                        shadow_color: 0, 0, 0, 0.05
 
                         MDBoxLayout:
                             orientation: "horizontal"
@@ -337,7 +348,8 @@ ScreenManager:
                             id: btn_chart_weekly
                             text: "Mingguan"
                             size_hint_x: 0.5
-                            elevation: 1
+                            elevation: 0.5
+                            radius: [12, 12, 12, 12]
                             md_bg_color: 0.12, 0.53, 0.90, 1
                             text_color: 1, 1, 1, 1
                             on_release: root.set_chart_mode("weekly")
@@ -347,6 +359,7 @@ ScreenManager:
                             text: "Bulanan (4 Mingu)"
                             size_hint_x: 0.5
                             elevation: 0
+                            radius: [12, 12, 12, 12]
                             md_bg_color: 0.85, 0.88, 0.92, 1
                             text_color: 0.3, 0.3, 0.3, 1
                             on_release: root.set_chart_mode("monthly")
@@ -354,17 +367,18 @@ ScreenManager:
                     MDCard:
                         size_hint: (1, None)
                         height: "150dp"
-                        radius: [14]
+                        radius: [14, 14, 14, 14]
                         padding: ["12dp", "8dp", "12dp", "8dp"]
                         md_bg_color: app.theme_cls.bg_light
-                        elevation: 1
+                        elevation: 0.5
+                        shadow_color: 0, 0, 0, 0.05
 
                         MDBoxLayout:
                             orientation: "vertical"
 
                             MDLabel:
                                 id: chart_title_label
-                                text: "Tugas Selesai (7 Hari Terakhir)"
+                                text: "Tugas Selesai (Kalender Mingguan)"
                                 font_style: "Caption"
                                 bold: True
                                 theme_text_color: "Secondary"
@@ -402,53 +416,61 @@ ScreenManager:
 
             Screen:
                 name: "tab_profil"
+                md_bg_color: app.theme_cls.bg_normal
                 ScrollView:
+                    pos_hint: {"top": 1}
+                    size_hint: (1, 1)
                     MDBoxLayout:
                         orientation: "vertical"
-                        padding: ["16dp", "10dp", "16dp", "20dp"]
-                        spacing: "12dp"
+                        padding: ["16dp", "16dp", "16dp", "24dp"]
+                        spacing: "16dp"
                         size_hint_y: None
                         height: self.minimum_height
 
                         MDCard:
                             size_hint: (1, None)
-                            height: "165dp"
-                            radius: [14]
-                            padding: ["16dp", "12dp", "16dp", "12dp"]
+                            height: "210dp"
+                            radius: [16, 16, 16, 16]
+                            padding: ["16dp", "16dp", "16dp", "16dp"]
                             md_bg_color: app.theme_cls.bg_light
-                            elevation: 1
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
 
                             MDBoxLayout:
                                 orientation: "vertical"
                                 pos_hint: {"center_x": 0.5}
-                                spacing: "4dp"
+                                spacing: "10dp"
 
                                 MDCard:
                                     size_hint: None, None
-                                    size: "48dp", "48dp"
-                                    radius: [24]
+                                    size: "64dp", "64dp"
+                                    radius: [32, 32, 32, 32]
                                     pos_hint: {"center_x": 0.5}
                                     elevation: 0
 
                                     FitImage:
                                         id: profile_avatar_img
                                         source: "avatars/avatar1.png"
-                                        radius: [24]
+                                        radius: [32, 32, 32, 32]
 
                                 MDLabel:
                                     id: profile_nama
                                     text: "Pengguna"
-                                    font_style: "Subtitle1"
+                                    font_style: "H6"
                                     bold: True
                                     halign: "center"
                                     theme_text_color: "Primary"
+                                    size_hint_y: None
+                                    height: "24dp"
 
                                 MDLabel:
                                     id: profile_email
                                     text: "email@domain.com"
-                                    font_style: "Caption"
+                                    font_style: "Body2"
                                     theme_text_color: "Secondary"
                                     halign: "center"
+                                    size_hint_y: None
+                                    height: "18dp"
 
                                 MDLabel:
                                     id: profile_created_at
@@ -457,6 +479,8 @@ ScreenManager:
                                     theme_text_color: "Hint"
                                     halign: "center"
                                     pos_hint: {"center_x": 0.5}
+                                    size_hint_y: None
+                                    height: "16dp"
 
                                 MDFlatButton:
                                     text: "Edit Profil"
@@ -467,19 +491,20 @@ ScreenManager:
 
                         MDCard:
                             size_hint: (1, None)
-                            height: "90dp"
-                            radius: [14]
-                            padding: "12dp"
+                            height: "105dp"
+                            radius: [16, 16, 16, 16]
+                            padding: "14dp"
                             md_bg_color: app.theme_cls.bg_light
-                            elevation: 1
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
 
                             MDBoxLayout:
                                 orientation: "vertical"
-                                spacing: "6dp"
+                                spacing: "8dp"
 
                                 MDLabel:
                                     text: "Lencana Pencapaian"
-                                    font_style: "Subtitle2"
+                                    font_style: "Subtitle1"
                                     bold: True
                                     theme_text_color: "Primary"
 
@@ -495,9 +520,9 @@ ScreenManager:
                                         width: self.minimum_width
 
                                         MDChip:
+                                            id: badge_pemula
                                             text: "Pemula"
                                             icon: "star"
-                                            selected_chip_color: 0.12, 0.53, 0.90, 0.2
 
                                         MDChip:
                                             id: badge_konsisten
@@ -515,19 +540,51 @@ ScreenManager:
 
                         MDCard:
                             size_hint: (1, None)
-                            height: "80dp"
-                            radius: [14]
-                            padding: "12dp"
+                            height: "75dp"
+                            radius: [16, 16, 16, 16]
+                            padding: ["14dp", "10dp", "14dp", "10dp"]
                             md_bg_color: app.theme_cls.bg_light
-                            elevation: 1
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
+
+                            MDBoxLayout:
+                                orientation: "horizontal"
+                                spacing: "14dp"
+
+                                MDIcon:
+                                    icon: "help-circle-outline"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.12, 0.53, 0.90, 1
+                                    pos_hint: {"center_y": 0.5}
+
+                                MDLabel:
+                                    text: "Pusat Bantuan & Panduan"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    theme_text_color: "Primary"
+                                    pos_hint: {"center_y": 0.5}
+
+                                MDIconButton:
+                                    icon: "chevron-right"
+                                    pos_hint: {"center_y": 0.5}
+                                    on_release: app.open_help_dialog()
+
+                        MDCard:
+                            size_hint: (1, None)
+                            height: "90dp"
+                            radius: [16, 16, 16, 16]
+                            padding: "14dp"
+                            md_bg_color: app.theme_cls.bg_light
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
 
                             MDBoxLayout:
                                 orientation: "vertical"
-                                spacing: "4dp"
+                                spacing: "6dp"
 
                                 MDLabel:
                                     text: "Pengaturan Aplikasi"
-                                    font_style: "Subtitle2"
+                                    font_style: "Subtitle1"
                                     bold: True
                                     theme_text_color: "Primary"
 
@@ -535,7 +592,7 @@ ScreenManager:
                                     orientation: "horizontal"
                                     MDLabel:
                                         text: "Notifikasi Pengingat"
-                                        font_style: "Body2"
+                                        font_style: "Body1"
                                         theme_text_color: "Primary"
                                         pos_hint: {"center_y": 0.5}
                                     MDSwitch:
@@ -545,12 +602,13 @@ ScreenManager:
                         MDRaisedButton:
                             text: "KELUAR (LOGOUT)"
                             size_hint_x: 1
-                            height: "44dp"
+                            height: "48dp"
+                            radius: [12, 12, 12, 12]
                             md_bg_color: 0.88, 0.2, 0.2, 1
                             on_release: root.open_logout_confirmation()
 
                         MDLabel:
-                            text: "Dolt App v1.0.0 • 2026"
+                            text: "DoIt App v1.0.0 • 2026"
                             font_style: "Caption"
                             theme_text_color: "Hint"
                             halign: "center"
@@ -566,6 +624,7 @@ ScreenManager:
             height: "56dp"
             pos_hint: {"bottom": 1}
             elevation: 1
+            shadow_color: 0, 0, 0, 0.05
             radius: [0, 0, 0, 0]
             md_bg_color: app.theme_cls.bg_light
 
@@ -644,10 +703,11 @@ ScreenManager:
                 MDCard:
                     size_hint: (1, None)
                     height: "160dp"
-                    radius: [14]
+                    radius: [14, 14, 14, 14]
                     padding: "12dp"
                     md_bg_color: app.theme_cls.bg_light
-                    elevation: 1
+                    elevation: 0.5
+                    shadow_color: 0, 0, 0, 0.05
 
                     MDBoxLayout:
                         orientation: "vertical"
@@ -663,14 +723,14 @@ ScreenManager:
                         MDCard:
                             size_hint: None, None
                             size: "48dp", "48dp"
-                            radius: [24]
+                            radius: [24, 24, 24, 24]
                             pos_hint: {"center_x": 0.5}
                             elevation: 0
 
                             FitImage:
                                 id: avatar_preview_img
                                 source: "avatars/avatar1.png"
-                                radius: [24]
+                                radius: [24, 24, 24, 24]
 
                         MDBoxLayout:
                             orientation: "horizontal"
@@ -683,55 +743,56 @@ ScreenManager:
                             MDCard:
                                 size_hint: None, None
                                 size: "40dp", "40dp"
-                                radius: [20]
+                                radius: [20, 20, 20, 20]
                                 on_release: root.select_avatar("avatars/avatar1.png")
                                 FitImage:
                                     source: "avatars/avatar1.png"
-                                    radius: [20]
+                                    radius: [20, 20, 20, 20]
 
                             MDCard:
                                 size_hint: None, None
                                 size: "40dp", "40dp"
-                                radius: [20]
+                                radius: [20, 20, 20, 20]
                                 on_release: root.select_avatar("avatars/avatar2.png")
                                 FitImage:
                                     source: "avatars/avatar2.png"
-                                    radius: [20]
+                                    radius: [20, 20, 20, 20]
 
                             MDCard:
                                 size_hint: None, None
                                 size: "40dp", "40dp"
-                                radius: [20]
+                                radius: [20, 20, 20, 20]
                                 on_release: root.select_avatar("avatars/avatar3.png")
                                 FitImage:
                                     source: "avatars/avatar3.png"
-                                    radius: [20]
+                                    radius: [20, 20, 20, 20]
 
                             MDCard:
                                 size_hint: None, None
                                 size: "40dp", "40dp"
-                                radius: [20]
+                                radius: [20, 20, 20, 20]
                                 on_release: root.select_avatar("avatars/avatar4.png")
                                 FitImage:
                                     source: "avatars/avatar4.png"
-                                    radius: [20]
+                                    radius: [20, 20, 20, 20]
 
                             MDCard:
                                 size_hint: None, None
                                 size: "40dp", "40dp"
-                                radius: [20]
+                                radius: [20, 20, 20, 20]
                                 on_release: root.select_avatar("avatars/avatar5.png")
                                 FitImage:
                                     source: "avatars/avatar5.png"
-                                    radius: [20]
+                                    radius: [20, 20, 20, 20]
 
                 MDCard:
                     size_hint: (1, None)
                     height: "170dp"
-                    radius: [14]
+                    radius: [14, 14, 14, 14]
                     padding: "14dp"
                     md_bg_color: app.theme_cls.bg_light
-                    elevation: 1
+                    elevation: 0.5
+                    shadow_color: 0, 0, 0, 0.05
 
                     MDBoxLayout:
                         orientation: "vertical"
@@ -756,10 +817,11 @@ ScreenManager:
                 MDCard:
                     size_hint: (1, None)
                     height: "220dp"
-                    radius: [14]
+                    radius: [14, 14, 14, 14]
                     padding: "14dp"
                     md_bg_color: app.theme_cls.bg_light
-                    elevation: 1
+                    elevation: 0.5
+                    shadow_color: 0, 0, 0, 0.05
 
                     MDBoxLayout:
                         orientation: "vertical"
@@ -793,5 +855,6 @@ ScreenManager:
                     text: "SIMPAN PERUBAHAN"
                     size_hint_x: 1
                     height: "48dp"
+                    radius: [12, 12, 12, 12]
                     md_bg_color: 0.12, 0.53, 0.90, 1
                     on_release: root.save_changes()

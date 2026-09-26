@@ -1,6 +1,12 @@
 import database
 from datetime import datetime, timedelta
 
+try:
+    from plyer import notification
+    PLYER_AVAILABLE = True
+except ImportError:
+    PLYER_AVAILABLE = False
+
 from kivy.config import Config
 Config.set('graphics', 'width', '360')
 Config.set('graphics', 'height', '640')
@@ -46,6 +52,7 @@ class LoginScreen(Screen):
 
             user = database.verify_user(email, password)
             if user:
+                database.save_session(user[2])
                 app = MDApp.get_running_app()
                 app.current_user_id = user[0]
                 app.current_user_nama = user[1]
@@ -88,6 +95,10 @@ class RegisterScreen(Screen):
 
         if not nama or not email or not password:
             self.show_dialog("Peringatan", "Semua kolom wajib diisi!")
+            return
+
+        if not email.endswith("@gmail.com"):
+            self.show_dialog("Pendaftaran Gagal", "Harap gunakan akun email dengan domain @gmail.com yang valid.")
             return
 
         success = database.register_user(nama, email, password)
@@ -202,10 +213,16 @@ class MainScreen(Screen):
 
         if tab_name == "tab_beranda":
             self.ids.nav_home.icon_color = blue
+            self.ids.main_header.height = "128dp"
+            self.ids.main_header.opacity = 1
         elif tab_name == "tab_statistik":
             self.ids.nav_stats.icon_color = blue
+            self.ids.main_header.height = "128dp"
+            self.ids.main_header.opacity = 1
         elif tab_name == "tab_profil":
             self.ids.nav_profile.icon_color = blue
+            self.ids.main_header.height = "0dp"
+            self.ids.main_header.opacity = 0
 
     def load_user_stats(self):
         pass
@@ -215,14 +232,14 @@ class MainScreen(Screen):
         if filter_type == "Tugas":
             self.ids.btn_tugas.md_bg_color = (0.12, 0.53, 0.90, 1)
             self.ids.btn_tugas.text_color = (1, 1, 1, 1)
-            self.ids.btn_tugas.elevation = 2
+            self.ids.btn_tugas.elevation = 1
             self.ids.btn_kebiasaan.md_bg_color = (0.85, 0.88, 0.92, 1)
             self.ids.btn_kebiasaan.text_color = (0.3, 0.3, 0.3, 1)
             self.ids.btn_kebiasaan.elevation = 0
         else:
             self.ids.btn_kebiasaan.md_bg_color = (0.12, 0.53, 0.90, 1)
             self.ids.btn_kebiasaan.text_color = (1, 1, 1, 1)
-            self.ids.btn_kebiasaan.elevation = 2
+            self.ids.btn_kebiasaan.elevation = 1
             self.ids.btn_tugas.md_bg_color = (0.85, 0.88, 0.92, 1)
             self.ids.btn_tugas.text_color = (0.3, 0.3, 0.3, 1)
             self.ids.btn_tugas.elevation = 0
@@ -237,7 +254,7 @@ class MainScreen(Screen):
             self.ids.btn_chart_monthly.md_bg_color = (0.85, 0.88, 0.92, 1)
             self.ids.btn_chart_monthly.text_color = (0.3, 0.3, 0.3, 1)
             self.ids.btn_chart_monthly.elevation = 0
-            self.ids.chart_title_label.text = "Tugas Selesai (7 Hari Terakhir)"
+            self.ids.chart_title_label.text = "Tugas Selesai (Kalender Mingguan)"
         else:
             self.ids.btn_chart_monthly.md_bg_color = (0.12, 0.53, 0.90, 1)
             self.ids.btn_chart_monthly.text_color = (1, 1, 1, 1)
@@ -319,8 +336,9 @@ class MainScreen(Screen):
                 card = MDCard(
                     size_hint=(1, None),
                     height="78dp" if deadline_str else "70dp",
-                    elevation=1,
-                    radius=[12],
+                    elevation=0.5,
+                    shadow_color=(0, 0, 0, 0.05),
+                    radius=[12, 12, 12, 12],
                     padding=["12dp", "6dp", "12dp", "6dp"],
                     md_bg_color=app.theme_cls.bg_light
                 )
@@ -452,8 +470,9 @@ class MainScreen(Screen):
                 card = MDCard(
                     size_hint=(1, None),
                     height="56dp",
-                    elevation=1,
-                    radius=[10],
+                    elevation=0.5,
+                    shadow_color=(0, 0, 0, 0.05),
+                    radius=[10, 10, 10, 10],
                     padding=["10dp", "4dp", "10dp", "4dp"],
                     md_bg_color=app.theme_cls.bg_light
                 )
@@ -521,7 +540,7 @@ class MainScreen(Screen):
                     size_hint=(1, None),
                     height="52dp",
                     elevation=0,
-                    radius=[8],
+                    radius=[8, 8, 8, 8],
                     padding=["10dp", "4dp", "10dp", "4dp"],
                     md_bg_color=app.theme_cls.bg_light
                 )
@@ -799,6 +818,25 @@ class MainScreen(Screen):
         if self.category_menu:
             self.category_menu.dismiss()
 
+    def trigger_task_notification(self, judul, deadline_str):
+        if not PLYER_AVAILABLE:
+            return
+        
+        try:
+            notif_title = "Pengingat Tugas DoIt!"
+            notif_text = f"Tugas baru: '{judul}' berhasil dijadwalkan."
+            if deadline_str:
+                notif_text += f" Tenggat: {deadline_str}"
+
+            notification.notify(
+                title=notif_title,
+                message=notif_text,
+                app_name="DoIt",
+                app_icon=""
+            )
+        except Exception as e:
+            print(f"Gagal memicu notifikasi: {e}")
+
     def save_task(self):
         judul = self.input_judul.text.strip()
         kategori = self.input_kategori.text.strip()
@@ -824,8 +862,10 @@ class MainScreen(Screen):
             if self.editing_task_id:
                 database.update_task(self.editing_task_id, judul, kategori, deadline)
             else:
-                database.add_task(app.current_user_id, judul, kategori, self.current_filter, deadline)
+                database.add_task(app.current_user_id, app.current_user_email, judul, kategori, self.current_filter, deadline)
             
+            self.trigger_task_notification(judul, deadline)
+
             self.dialog.dismiss()
             self.load_tasks()
             self.load_user_stats()
@@ -915,6 +955,7 @@ class MainScreen(Screen):
     def execute_logout(self):
         if self.logout_dialog:
             self.logout_dialog.dismiss()
+        database.clear_session()
         app = MDApp.get_running_app()
         app.current_user_id = None
         app.current_user_nama = ""
@@ -979,6 +1020,7 @@ class EditProfileScreen(Screen):
             app.current_user_avatar = self.selected_avatar
 
             self.manager.get_screen("main").setup_user_data()
+            database.save_session(email)
             self.show_dialog("Berhasil", "Profil berhasil diperbarui!", callback=self.go_back)
         else:
             self.show_dialog("Gagal", "Email sudah digunakan pengguna lain!")
@@ -1019,7 +1061,77 @@ class DoItApp(MDApp):
         self.current_user_created_at = "-"
 
         database.init_db()
+
+        active_email = database.get_active_session()
+        if active_email:
+            user = database.get_user_by_email(active_email)
+            if user:
+                self.current_user_id = user[0]
+                self.current_user_nama = user[1]
+                self.current_user_email = user[2]
+                self.current_user_password = user[3]
+                self.current_user_avatar = user[4] if len(user) > 4 and user[4] else "avatars/avatar1.png"
+                self.current_user_created_at = user[5] if len(user) > 5 and user[5] else "-"
+                
+                Clock.schedule_numbers_once = lambda *args: None
+                Clock.schedule_once(lambda dt: self.to_main_screen(), 0.1)
+
         return Builder.load_file("doit.kv")
+
+    def to_main_screen(self):
+        if self.root:
+            main_scr = self.root.get_screen("main")
+            main_scr.setup_user_data()
+            self.root.current = "main"
+
+    def open_help_dialog(self):
+        help_content = MDBoxLayout(
+            orientation="vertical",
+            spacing="10dp",
+            size_hint_y=None,
+            height="220dp"
+        )
+        
+        scroll = ScrollView(size_hint=(1, 1))
+        inner_box = MDBoxLayout(orientation="vertical", spacing="8dp", size_hint_y=None)
+        inner_box.bind(minimum_height=inner_box.setter('height'))
+        
+        faq_text = (
+            "[b]1. Bagaimana cara menambah tugas?[/b]\n"
+            "Tekan tombol ikon plus (+) mengambang di pojok kanan bawah halaman utama.\n\n"
+            "[b]2. Bagaimana melihat statistik?[/b]\n"
+            "Pilih ikon grafik batang pada menu navigasi bawah untuk melihat streak dan grafik tugas selesai.\n\n"
+            "[b]3. Bagaimana cara mengubah profil?[/b]\n"
+            "Masuk ke tab Profil, lalu ketuk tombol 'Edit Profil'."
+        )
+        
+        lbl = MDLabel(
+            text=faq_text,
+            markup=True,
+            font_style="Body2",
+            theme_text_color="Primary",
+            size_hint_y=None
+        )
+        lbl.bind(texture_size=lambda *x: setattr(lbl, 'height', lbl.texture_size[1]))
+        
+        inner_box.add_widget(lbl)
+        scroll.add_widget(inner_box)
+        help_content.add_widget(scroll)
+
+        self.help_dialog = MDDialog(
+            title="Pusat Bantuan & Panduan",
+            type="custom",
+            content_cls=help_content,
+            buttons=[
+                MDFlatButton(
+                    text="TUTUP",
+                    theme_text_color="Custom",
+                    text_color=(0.12, 0.53, 0.90, 1),
+                    on_release=lambda x: self.help_dialog.dismiss()
+                )
+            ]
+        )
+        self.help_dialog.open()
 
 
 if __name__ == "__main__":
