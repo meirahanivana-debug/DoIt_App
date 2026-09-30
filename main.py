@@ -1,3 +1,5 @@
+import os
+import traceback
 import database
 from datetime import datetime, timedelta
 
@@ -17,6 +19,8 @@ Window.size = (360, 640)
 
 from kivy.lang import Builder
 from kivy.clock import Clock
+from kivy.metrics import dp
+from kivy.storage.jsonstore import JsonStore
 from kivy.uix.screenmanager import Screen
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
@@ -156,6 +160,11 @@ class MainScreen(Screen):
         self.selected_date = None
         self.selected_time = None
         self.editing_task_id = None
+        self._settings_store = None
+        self._loading_settings = False
+        self.reminder_enabled = True
+        self.reminder_interval = 3
+        self.interval_menu = None
 
     def setup_user_data(self):
         app = MDApp.get_running_app()
@@ -193,6 +202,7 @@ class MainScreen(Screen):
         self.update_streak()
         self.load_chart_data()
         self.load_user_stats()
+        self.load_reminder_settings()
 
     def apply_header_color(self):
         header_color = (0.12, 0.53, 0.90, 1)
@@ -210,6 +220,16 @@ class MainScreen(Screen):
         self.ids.nav_home.icon_color = gray
         self.ids.nav_stats.icon_color = gray
         self.ids.nav_profile.icon_color = gray
+
+        try:
+            if tab_name == "tab_profil":
+                self.ids.fab_add.opacity = 0
+                self.ids.fab_add.disabled = True
+            else:
+                self.ids.fab_add.opacity = 1
+                self.ids.fab_add.disabled = False
+        except Exception as e:
+            print(f"Gagal mengatur tombol tambah: {e}")
 
         if tab_name == "tab_beranda":
             self.ids.nav_home.icon_color = blue
@@ -246,6 +266,13 @@ class MainScreen(Screen):
         self.load_tasks()
 
     def set_chart_mode(self, mode):
+        try:
+            self._apply_chart_mode(mode)
+        except Exception:
+            print("Gagal mengganti mode grafik:")
+            traceback.print_exc()
+
+    def _apply_chart_mode(self, mode):
         self.chart_mode = mode
         if mode == "weekly":
             self.ids.btn_chart_weekly.md_bg_color = (0.12, 0.53, 0.90, 1)
@@ -634,28 +661,30 @@ class MainScreen(Screen):
             self.ids.chart_container.add_widget(empty_box)
             return
 
-        for label_text, cnt in chart_data:
-            col = MDBoxLayout(orientation="vertical", spacing="4dp")
+        try:
+            for label_text, cnt in chart_data:
+                col = MDBoxLayout(orientation="vertical", spacing=dp(4))
 
-            val_label = MDLabel(text=str(cnt), font_style="Caption", halign="center", theme_text_color="Secondary", size_hint_y=None, height="14dp")
-            calculated_height = max(10, min(100, cnt * 8))
-            
-            bar_card = MDCard(
-                size_hint=(None, None),
-                width="24dp",
-                height=f"{calculated_height}dp",
-                md_bg_color=(0.12, 0.53, 0.90, 0.85) if cnt > 0 else (0.85, 0.88, 0.92, 1),
-                radius=[4, 4, 0, 0],
-                pos_hint={"center_x": 0.5}
-            )
+                val_label = MDLabel(text=str(cnt), font_style="Caption", halign="center", theme_text_color="Secondary", size_hint_y=None, height=dp(14))
+                calculated_height = max(10, min(70, cnt * 8))
 
-            desc_label = MDLabel(text=label_text, font_style="Caption", halign="center", bold=True, theme_text_color="Primary", size_hint_y=None, height="14dp")
+                bar_card = MDBoxLayout(
+                    size_hint=(None, None),
+                    width=dp(24),
+                    height=dp(calculated_height),
+                    md_bg_color=(0.12, 0.53, 0.90, 0.85) if cnt > 0 else (0.85, 0.88, 0.92, 1),
+                    pos_hint={"center_x": 0.5}
+                )
 
-            col.add_widget(val_label)
-            col.add_widget(bar_card)
-            col.add_widget(desc_label)
+                desc_label = MDLabel(text=label_text, font_style="Caption", halign="center", bold=True, theme_text_color="Primary", size_hint_y=None, height=dp(14))
 
-            self.ids.chart_container.add_widget(col)
+                col.add_widget(val_label)
+                col.add_widget(bar_card)
+                col.add_widget(desc_label)
+
+                self.ids.chart_container.add_widget(col)
+        except Exception as e:
+            print(f"Gagal menampilkan grafik: {e}")
 
     def show_add_task_dialog(self):
         self.editing_task_id = None
@@ -818,21 +847,115 @@ class MainScreen(Screen):
         if self.category_menu:
             self.category_menu.dismiss()
 
+    def _get_settings_store(self):
+        if self._settings_store is None:
+            app = MDApp.get_running_app()
+            folder = app.user_data_dir
+            try:
+                os.makedirs(folder, exist_ok=True)
+            except Exception:
+                pass
+            self._settings_store = JsonStore(os.path.join(folder, "doit_settings.json"))
+        return self._settings_store
+
+    def load_reminder_settings(self):
+        enabled = True
+        interval = 3
+        try:
+            store = self._get_settings_store()
+            if store.exists("reminder"):
+                data = store.get("reminder")
+                enabled = bool(data.get("enabled", True))
+                interval = int(data.get("interval_hours", 3))
+        except Exception as e:
+            print(f"Gagal membaca pengaturan pengingat: {e}")
+
+        self.reminder_enabled = enabled
+        self.reminder_interval = interval
+
+        self._loading_settings = True
+        try:
+            self.ids.notif_switch.active = enabled
+            self.ids.btn_interval.text = f"{interval} Jam"
+        except Exception as e:
+            print(f"Gagal menampilkan pengaturan pengingat: {e}")
+        self._loading_settings = False
+
+    def save_reminder_settings(self):
+        try:
+            store = self._get_settings_store()
+            store.put("reminder", enabled=self.reminder_enabled, interval_hours=self.reminder_interval)
+        except Exception as e:
+            print(f"Gagal menyimpan pengaturan pengingat: {e}")
+
+    def on_notif_switch(self, value):
+        if getattr(self, "_loading_settings", True):
+            return
+        self.reminder_enabled = bool(value)
+        self.save_reminder_settings()
+
+    def open_interval_menu(self, instance):
+        menu_items = [
+            {
+                "viewclass": "OneLineListItem",
+                "text": f"{h} Jam",
+                "on_release": lambda x=h: self.set_reminder_interval(x),
+            } for h in (1, 2, 3, 6, 12, 24)
+        ]
+        self.interval_menu = MDDropdownMenu(
+            caller=instance,
+            items=menu_items,
+            width_mult=3,
+        )
+        self.interval_menu.open()
+
+    def set_reminder_interval(self, hours):
+        self.reminder_interval = int(hours)
+        self.ids.btn_interval.text = f"{self.reminder_interval} Jam"
+        if self.interval_menu:
+            self.interval_menu.dismiss()
+        self.save_reminder_settings()
+
     def trigger_task_notification(self, judul, deadline_str):
         if not PLYER_AVAILABLE:
             return
-        
+        if not self.reminder_enabled:
+            return
+        if not deadline_str:
+            return
+
         try:
-            notif_title = "Pengingat Tugas DoIt!"
-            notif_text = f"Tugas baru: '{judul}' berhasil dijadwalkan."
-            if deadline_str:
-                notif_text += f" Tenggat: {deadline_str}"
+            if len(deadline_str) > 10:
+                d_dt = datetime.strptime(deadline_str, "%Y-%m-%d %H:%M")
+            else:
+                d_dt = datetime.strptime(deadline_str, "%Y-%m-%d").replace(hour=23, minute=59)
+
+            now = datetime.now()
+            remaining = d_dt - now
+            hours_left = remaining.total_seconds() / 3600.0
+            today = now.date()
+
+            status = None
+            if remaining.total_seconds() < 0:
+                status = "sudah terlewat"
+            elif d_dt.date() == today:
+                total_minutes = int(remaining.total_seconds() // 60)
+                h, m = divmod(total_minutes, 60)
+                status = f"hari ini (sisa {h} jam {m} menit)"
+            elif d_dt.date() == today + timedelta(days=1):
+                status = "besok (H-1)"
+            elif hours_left <= self.reminder_interval:
+                status = f"dalam {int(hours_left)} jam lagi"
+
+            if status is None:
+                return
 
             notification.notify(
-                title=notif_title,
-                message=notif_text,
+                title="Pengingat Tugas DoIt!",
+                message=f"Tugas '{judul}' - deadline {status}.",
                 app_name="DoIt",
-                app_icon=""
+                app_icon="",
+                timeout=10
             )
         except Exception as e:
             print(f"Gagal memicu notifikasi: {e}")
