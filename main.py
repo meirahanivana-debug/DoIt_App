@@ -7,13 +7,15 @@ try:
 except ImportError:
     PLYER_AVAILABLE = False
 
+from kivy.utils import platform
 from kivy.config import Config
-Config.set('graphics', 'width', '360')
-Config.set('graphics', 'height', '640')
-Config.set('graphics', 'resizable', '0')
 
-from kivy.core.window import Window
-Window.size = (360, 640)
+if platform != "android":
+    Config.set('graphics', 'width', '360')
+    Config.set('graphics', 'height', '640')
+    Config.set('graphics', 'resizable', '0')
+    from kivy.core.window import Window
+    Window.size = (360, 640)
 
 from kivy.lang import Builder
 from kivy.clock import Clock
@@ -1073,10 +1075,14 @@ class DoItApp(MDApp):
                 self.current_user_avatar = user[4] if len(user) > 4 and user[4] else "avatars/avatar1.png"
                 self.current_user_created_at = user[5] if len(user) > 5 and user[5] else "-"
                 
-                Clock.schedule_numbers_once = lambda *args: None
                 Clock.schedule_once(lambda dt: self.to_main_screen(), 0.1)
 
         return Builder.load_file("doit.kv")
+
+    def on_start(self):
+        if platform == "android":
+            from android.permissions import request_permissions
+            request_permissions(["android.permission.POST_NOTIFICATIONS"])
 
     def to_main_screen(self):
         if self.root:

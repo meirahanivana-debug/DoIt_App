@@ -1,0 +1,43 @@
+name: Build Android APK with Buildozer
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libunwind-dev
+        sudo apt-get install -y build-essential git ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good zip unzip openjdk-17-jdk libtool automake autoconf pkg-config
+        pip install --upgrade pip
+        pip install cython buildozer sh
+
+    - name: Clean Old Broken Cache
+      run: |
+        # Menghapus folder sisa build komputer lokal agar tidak bentrok jalur direktorinya
+        rm -rf .buildozer
+        rm -rf venv_buildozer
+
+    - name: Build APK with Buildozer
+      run: |
+        yes | buildozer -v android debug
+
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: DoItApp-APK
+        path: bin/*.apk

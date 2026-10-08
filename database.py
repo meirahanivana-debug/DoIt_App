@@ -1,7 +1,13 @@
+import os
 import sqlite3
 from datetime import datetime, timedelta
+from kivy.utils import platform
 
-DB_NAME = "doit.db"
+if platform == "android":
+    from android.storage import app_storage_path
+    DB_NAME = os.path.join(app_storage_path(), "doit.db")
+else:
+    DB_NAME = "doit.db"
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
