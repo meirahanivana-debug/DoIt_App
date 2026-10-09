@@ -1,0 +1,860 @@
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+
+ScreenManager:
+    transition: NoTransition()
+    LoginScreen:
+        name: "login"
+    RegisterScreen:
+        name: "register"
+    MainScreen:
+        name: "main"
+    EditProfileScreen:
+        name: "edit_profile"
+
+<LoginScreen>:
+    MDFloatLayout:
+        md_bg_color: app.theme_cls.bg_normal
+
+        MDCard:
+            size_hint: 0.88, None
+            height: "470dp"
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            elevation: 1
+            radius: [16, 16, 16, 16]
+            padding: ["20dp", "24dp", "20dp", "20dp"]
+            md_bg_color: app.theme_cls.bg_light
+
+            MDBoxLayout:
+                orientation: "vertical"
+                spacing: "16dp"
+
+                MDBoxLayout:
+                    orientation: "horizontal"
+                    size_hint: None, None
+                    size: "180dp", "70dp"
+                    pos_hint: {"center_x": 0.5}
+
+                    FitImage:
+                        source: "logo_doit.png"
+                        size_hint: None, None
+                        size: "180dp", "70dp"
+
+                MDLabel:
+                    text: "Masuk ke Akun Anda"
+                    font_style: "Body2"
+                    halign: "center"
+                    theme_text_color: "Secondary"
+                    size_hint_y: None
+                    height: "20dp"
+
+                MDTextField:
+                    id: email_input
+                    hint_text: "Email / Username"
+                    icon_left: "account"
+                    mode: "rectangle"
+
+                MDRelativeLayout:
+                    size_hint_y: None
+                    height: "60dp"
+
+                    MDTextField:
+                        id: password_input
+                        hint_text: "Kata Sandi"
+                        icon_left: "lock"
+                        password: True
+                        mode: "rectangle"
+                        pos_hint: {"center_x": 0.5, "center_y": 0.5}
+
+                    MDIconButton:
+                        icon: "eye-off"
+                        pos_hint: {"right": 0.98, "center_y": 0.4}
+                        on_release: root.toggle_password_visibility(self)
+
+                MDRaisedButton:
+                    text: "MASUK"
+                    size_hint_x: 1
+                    height: "48dp"
+                    radius: [12, 12, 12, 12]
+                    md_bg_color: 0.12, 0.53, 0.90, 1
+                    on_release: root.do_login()
+
+                MDFlatButton:
+                    text: "Belum punya akun? Daftar sekarang"
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Custom"
+                    text_color: 0.12, 0.53, 0.90, 1
+                    on_release: root.manager.current = "register"
+
+
+<RegisterScreen>:
+    MDFloatLayout:
+        md_bg_color: app.theme_cls.bg_normal
+
+        MDCard:
+            size_hint: 0.88, None
+            height: "510dp"
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            elevation: 1
+            radius: [16, 16, 16, 16]
+            padding: ["20dp", "20dp", "20dp", "20dp"]
+            md_bg_color: app.theme_cls.bg_light
+
+            MDBoxLayout:
+                orientation: "vertical"
+                spacing: "14dp"
+
+                MDBoxLayout:
+                    orientation: "horizontal"
+                    size_hint: None, None
+                    size: "160dp", "60dp"
+                    pos_hint: {"center_x": 0.5}
+
+                    FitImage:
+                        source: "logo_doit.png"
+                        size_hint: None, None
+                        size: "160dp", "60dp"
+
+                MDLabel:
+                    text: "Buat Akun Baru"
+                    font_style: "Body2"
+                    halign: "center"
+                    theme_text_color: "Secondary"
+                    size_hint_y: None
+                    height: "18dp"
+
+                MDTextField:
+                    id: reg_nama_input
+                    hint_text: "Nama Lengkap"
+                    icon_left: "account"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: reg_email_input
+                    hint_text: "Email"
+                    icon_left: "email"
+                    mode: "rectangle"
+
+                MDTextField:
+                    id: reg_password_input
+                    hint_text: "Kata Sandi"
+                    icon_left: "lock"
+                    password: True
+                    mode: "rectangle"
+
+                MDRaisedButton:
+                    text: "DAFTAR"
+                    size_hint_x: 1
+                    height: "48dp"
+                    radius: [12, 12, 12, 12]
+                    md_bg_color: 0.12, 0.53, 0.90, 1
+                    on_release: root.do_register()
+
+                MDFlatButton:
+                    text: "Sudah punya akun? Login"
+                    pos_hint: {"center_x": 0.5}
+                    theme_text_color: "Custom"
+                    text_color: 0.12, 0.53, 0.90, 1
+                    on_release: root.manager.current = "login"
+
+
+<MainScreen>:
+    MDFloatLayout:
+        md_bg_color: app.theme_cls.bg_normal
+
+        MDBoxLayout:
+            id: main_header
+            orientation: "vertical"
+            size_hint: (1, None)
+            height: "128dp"
+            pos_hint: {"top": 1}
+            md_bg_color: 0.12, 0.53, 0.90, 1
+            padding: ["16dp", "14dp", "16dp", "10dp"]
+            spacing: "8dp"
+
+            MDBoxLayout:
+                orientation: "horizontal"
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    spacing: "2dp"
+
+                    MDLabel:
+                        id: greeting_label
+                        text: "Selamat Pagi!"
+                        font_style: "H6"
+                        bold: True
+                        theme_text_color: "Custom"
+                        text_color: 1, 1, 1, 1
+                    MDLabel:
+                        text: "Selesaikan tugas & raih targetmu"
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 0.9, 0.95, 1, 1
+
+                MDCard:
+                    size_hint: None, None
+                    size: "90dp", "38dp"
+                    radius: [12, 12, 12, 12]
+                    md_bg_color: 1, 1, 1, 0.9
+                    elevation: 0
+                    pos_hint: {"center_y": 0.5}
+                    padding: ["4dp", "2dp", "4dp", "2dp"]
+
+                    FitImage:
+                        source: "logo_doit.png"
+
+            MDCard:
+                size_hint: (None, None)
+                size: ("140dp", "26dp")
+                radius: [12, 12, 12, 12]
+                md_bg_color: 1, 1, 1, 0.2
+                elevation: 0
+
+                MDBoxLayout:
+                    orientation: "horizontal"
+                    padding: ["8dp", "0dp", "8dp", "0dp"]
+                    spacing: "4dp"
+                    MDIcon:
+                        icon: "calendar-month"
+                        font_size: "16sp"
+                        theme_text_color: "Custom"
+                        text_color: 1, 1, 1, 1
+                        pos_hint: {"center_y": 0.5}
+                    MDLabel:
+                        id: date_label
+                        text: "17 Sep 2026"
+                        font_style: "Caption"
+                        theme_text_color: "Custom"
+                        text_color: 1, 1, 1, 1
+                        pos_hint: {"center_y": 0.5}
+
+        ScreenManager:
+            transition: NoTransition()
+            id: main_sm
+            size_hint: (1, None)
+            height: "584dp"
+            pos_hint: {"top": 1}
+
+            Screen:
+                name: "tab_beranda"
+                md_bg_color: app.theme_cls.bg_normal
+                MDBoxLayout:
+                    orientation: "vertical"
+                    padding: ["16dp", "138dp", "16dp", "10dp"]
+                    spacing: "16dp"
+
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "40dp"
+                        spacing: "10dp"
+
+                        MDRaisedButton:
+                            id: btn_tugas
+                            text: "Tugas"
+                            size_hint_x: 0.5
+                            elevation: 1
+                            radius: [12, 12, 12, 12]
+                            md_bg_color: 0.12, 0.53, 0.90, 1
+                            text_color: 1, 1, 1, 1
+                            on_release: root.switch_filter("Tugas")
+
+                        MDRaisedButton:
+                            id: btn_kebiasaan
+                            text: "Kebiasaan"
+                            size_hint_x: 0.5
+                            elevation: 0
+                            radius: [12, 12, 12, 12]
+                            md_bg_color: 0.85, 0.88, 0.92, 1
+                            text_color: 0.3, 0.3, 0.3, 1
+                            on_release: root.switch_filter("Kebiasaan")
+
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "42dp"
+                        spacing: "8dp"
+
+                        MDTextField:
+                            id: search_field
+                            hint_text: "Cari tugas..."
+                            icon_left: "magnify"
+                            mode: "rectangle"
+                            on_text: root.on_search_text_change(self.text)
+
+                        MDIconButton:
+                            id: sort_btn
+                            icon: "sort-variant"
+                            theme_icon_color: "Custom"
+                            icon_color: 0.12, 0.53, 0.90, 1
+                            pos_hint: {"center_y": 0.5}
+                            on_release: root.open_sort_menu(self)
+
+                    ScrollView:
+                        MDList:
+                            id: task_list
+                            spacing: "8dp"
+
+            Screen:
+                name: "tab_statistik"
+                md_bg_color: app.theme_cls.bg_normal
+                MDBoxLayout:
+                    orientation: "vertical"
+                    padding: ["16dp", "138dp", "16dp", "10dp"]
+                    spacing: "10dp"
+
+                    MDCard:
+                        size_hint: (1, None)
+                        height: "60dp"
+                        radius: [14, 14, 14, 14]
+                        padding: ["16dp", "6dp", "16dp", "6dp"]
+                        md_bg_color: app.theme_cls.bg_light
+                        elevation: 0.5
+                        shadow_color: 0, 0, 0, 0.05
+
+                        MDBoxLayout:
+                            orientation: "horizontal"
+                            spacing: "12dp"
+
+                            MDIcon:
+                                icon: "fire"
+                                font_size: "26sp"
+                                theme_text_color: "Custom"
+                                text_color: 0.95, 0.4, 0.1, 1
+                                pos_hint: {"center_y": 0.5}
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                pos_hint: {"center_y": 0.5}
+                                MDLabel:
+                                    text: "Streak Saat Ini"
+                                    font_style: "Caption"
+                                    theme_text_color: "Secondary"
+                                MDLabel:
+                                    id: streak_label
+                                    text: "0 Hari Beruntun"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    theme_text_color: "Custom"
+                                    text_color: 0.95, 0.4, 0.1, 1
+
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "36dp"
+                        spacing: "8dp"
+
+                        MDRaisedButton:
+                            id: btn_chart_weekly
+                            text: "Mingguan"
+                            size_hint_x: 0.5
+                            elevation: 0.5
+                            radius: [12, 12, 12, 12]
+                            md_bg_color: 0.12, 0.53, 0.90, 1
+                            text_color: 1, 1, 1, 1
+                            on_release: root.set_chart_mode("weekly")
+
+                        MDRaisedButton:
+                            id: btn_chart_monthly
+                            text: "Bulanan (4 Mingu)"
+                            size_hint_x: 0.5
+                            elevation: 0
+                            radius: [12, 12, 12, 12]
+                            md_bg_color: 0.85, 0.88, 0.92, 1
+                            text_color: 0.3, 0.3, 0.3, 1
+                            on_release: root.set_chart_mode("monthly")
+
+                    MDCard:
+                        size_hint: (1, None)
+                        height: "150dp"
+                        radius: [14, 14, 14, 14]
+                        padding: ["12dp", "8dp", "12dp", "8dp"]
+                        md_bg_color: app.theme_cls.bg_light
+                        elevation: 0.5
+                        shadow_color: 0, 0, 0, 0.05
+
+                        MDBoxLayout:
+                            orientation: "vertical"
+
+                            MDLabel:
+                                id: chart_title_label
+                                text: "Tugas Selesai (Kalender Mingguan)"
+                                font_style: "Caption"
+                                bold: True
+                                theme_text_color: "Secondary"
+                                size_hint_y: None
+                                height: "18dp"
+
+                            MDBoxLayout:
+                                id: chart_container
+                                orientation: "horizontal"
+                                spacing: "6dp"
+
+                    MDBoxLayout:
+                        orientation: "horizontal"
+                        size_hint_y: None
+                        height: "26dp"
+
+                        MDLabel:
+                            text: "Riwayat Aktivitas"
+                            font_style: "Subtitle2"
+                            bold: True
+                            theme_text_color: "Primary"
+                            pos_hint: {"center_y": 0.5}
+
+                        MDFlatButton:
+                            text: "Lihat Semua"
+                            theme_text_color: "Custom"
+                            text_color: 0.12, 0.53, 0.90, 1
+                            pos_hint: {"center_y": 0.5}
+                            on_release: root.open_all_history_dialog()
+
+                    ScrollView:
+                        MDList:
+                            id: history_list
+                            spacing: "8dp"
+
+            Screen:
+                name: "tab_profil"
+                md_bg_color: app.theme_cls.bg_normal
+                ScrollView:
+                    pos_hint: {"top": 1}
+                    size_hint: (1, 1)
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        padding: ["16dp", "16dp", "16dp", "24dp"]
+                        spacing: "16dp"
+                        size_hint_y: None
+                        height: self.minimum_height
+
+                        MDCard:
+                            size_hint: (1, None)
+                            height: "210dp"
+                            radius: [16, 16, 16, 16]
+                            padding: ["16dp", "16dp", "16dp", "16dp"]
+                            md_bg_color: app.theme_cls.bg_light
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                pos_hint: {"center_x": 0.5}
+                                spacing: "10dp"
+
+                                MDCard:
+                                    size_hint: None, None
+                                    size: "64dp", "64dp"
+                                    radius: [32, 32, 32, 32]
+                                    pos_hint: {"center_x": 0.5}
+                                    elevation: 0
+
+                                    FitImage:
+                                        id: profile_avatar_img
+                                        source: "avatars/avatar1.png"
+                                        radius: [32, 32, 32, 32]
+
+                                MDLabel:
+                                    id: profile_nama
+                                    text: "Pengguna"
+                                    font_style: "H6"
+                                    bold: True
+                                    halign: "center"
+                                    theme_text_color: "Primary"
+                                    size_hint_y: None
+                                    height: "24dp"
+
+                                MDLabel:
+                                    id: profile_email
+                                    text: "email@domain.com"
+                                    font_style: "Body2"
+                                    theme_text_color: "Secondary"
+                                    halign: "center"
+                                    size_hint_y: None
+                                    height: "18dp"
+
+                                MDLabel:
+                                    id: profile_created_at
+                                    text: "Bergabung: -"
+                                    font_style: "Caption"
+                                    theme_text_color: "Hint"
+                                    halign: "center"
+                                    pos_hint: {"center_x": 0.5}
+                                    size_hint_y: None
+                                    height: "16dp"
+
+                                MDFlatButton:
+                                    text: "Edit Profil"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.12, 0.53, 0.90, 1
+                                    pos_hint: {"center_x": 0.5}
+                                    on_release: root.open_edit_profile()
+
+                        MDCard:
+                            size_hint: (1, None)
+                            height: "105dp"
+                            radius: [16, 16, 16, 16]
+                            padding: "14dp"
+                            md_bg_color: app.theme_cls.bg_light
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                spacing: "8dp"
+
+                                MDLabel:
+                                    text: "Lencana Pencapaian"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    theme_text_color: "Primary"
+
+                                ScrollView:
+                                    do_scroll_y: False
+                                    do_scroll_x: True
+                                    bar_width: 0
+
+                                    MDBoxLayout:
+                                        orientation: "horizontal"
+                                        spacing: "8dp"
+                                        size_hint_x: None
+                                        width: self.minimum_width
+
+                                        MDChip:
+                                            id: badge_pemula
+                                            text: "Pemula"
+                                            icon: "star"
+
+                                        MDChip:
+                                            id: badge_konsisten
+                                            text: "Konsisten"
+                                            icon: "fire"
+
+                                        MDChip:
+                                            id: badge_produktif
+                                            text: "Produktif"
+                                            icon: "trophy"
+
+                                        MDChip:
+                                            text: "Master"
+                                            icon: "crown"
+
+                        MDCard:
+                            size_hint: (1, None)
+                            height: "75dp"
+                            radius: [16, 16, 16, 16]
+                            padding: ["14dp", "10dp", "14dp", "10dp"]
+                            md_bg_color: app.theme_cls.bg_light
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
+
+                            MDBoxLayout:
+                                orientation: "horizontal"
+                                spacing: "14dp"
+
+                                MDIcon:
+                                    icon: "help-circle-outline"
+                                    theme_text_color: "Custom"
+                                    text_color: 0.12, 0.53, 0.90, 1
+                                    pos_hint: {"center_y": 0.5}
+
+                                MDLabel:
+                                    text: "Pusat Bantuan & Panduan"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    theme_text_color: "Primary"
+                                    pos_hint: {"center_y": 0.5}
+
+                                MDIconButton:
+                                    icon: "chevron-right"
+                                    pos_hint: {"center_y": 0.5}
+                                    on_release: app.open_help_dialog()
+
+                        MDCard:
+                            size_hint: (1, None)
+                            height: "90dp"
+                            radius: [16, 16, 16, 16]
+                            padding: "14dp"
+                            md_bg_color: app.theme_cls.bg_light
+                            elevation: 0.5
+                            shadow_color: 0, 0, 0, 0.05
+
+                            MDBoxLayout:
+                                orientation: "vertical"
+                                spacing: "6dp"
+
+                                MDLabel:
+                                    text: "Pengaturan Aplikasi"
+                                    font_style: "Subtitle1"
+                                    bold: True
+                                    theme_text_color: "Primary"
+
+                                MDBoxLayout:
+                                    orientation: "horizontal"
+                                    MDLabel:
+                                        text: "Notifikasi Pengingat"
+                                        font_style: "Body1"
+                                        theme_text_color: "Primary"
+                                        pos_hint: {"center_y": 0.5}
+                                    MDSwitch:
+                                        active: True
+                                        pos_hint: {"center_y": 0.5}
+
+                        MDRaisedButton:
+                            text: "KELUAR (LOGOUT)"
+                            size_hint_x: 1
+                            height: "48dp"
+                            radius: [12, 12, 12, 12]
+                            md_bg_color: 0.88, 0.2, 0.2, 1
+                            on_release: root.open_logout_confirmation()
+
+                        MDLabel:
+                            text: "DoIt App v1.0.0 • 2026"
+                            font_style: "Caption"
+                            theme_text_color: "Hint"
+                            halign: "center"
+
+        MDFloatingActionButton:
+            icon: "plus"
+            md_bg_color: 0.12, 0.53, 0.90, 1
+            pos_hint: {"right": 0.9, "y": 0.11}
+            on_release: root.show_add_task_dialog()
+
+        MDCard:
+            size_hint: (1, None)
+            height: "56dp"
+            pos_hint: {"bottom": 1}
+            elevation: 1
+            shadow_color: 0, 0, 0, 0.05
+            radius: [0, 0, 0, 0]
+            md_bg_color: app.theme_cls.bg_light
+
+            MDBoxLayout:
+                orientation: "horizontal"
+
+                MDIconButton:
+                    id: nav_home
+                    icon: "home"
+                    size_hint_x: 0.33
+                    theme_icon_color: "Custom"
+                    icon_color: 0.12, 0.53, 0.90, 1
+                    on_release: root.switch_tab("tab_beranda")
+
+                MDIconButton:
+                    id: nav_stats
+                    icon: "chart-bar"
+                    size_hint_x: 0.33
+                    theme_icon_color: "Custom"
+                    icon_color: 0.5, 0.5, 0.5, 1
+                    on_release: root.switch_tab("tab_statistik")
+
+                MDIconButton:
+                    id: nav_profile
+                    icon: "account"
+                    size_hint_x: 0.33
+                    theme_icon_color: "Custom"
+                    icon_color: 0.5, 0.5, 0.5, 1
+                    on_release: root.switch_tab("tab_profil")
+
+
+<EditProfileScreen>:
+    MDFloatLayout:
+        md_bg_color: app.theme_cls.bg_normal
+
+        MDBoxLayout:
+            id: edit_profile_header
+            orientation: "vertical"
+            size_hint: (1, None)
+            height: "56dp"
+            pos_hint: {"top": 1}
+            md_bg_color: 0.12, 0.53, 0.90, 1
+            padding: ["8dp", "0dp", "8dp", "0dp"]
+
+            MDBoxLayout:
+                orientation: "horizontal"
+                spacing: "8dp"
+
+                MDIconButton:
+                    icon: "arrow-left"
+                    theme_icon_color: "Custom"
+                    icon_color: 1, 1, 1, 1
+                    pos_hint: {"center_y": 0.5}
+                    on_release: root.manager.current = "main"
+
+                MDLabel:
+                    text: "Edit Profil"
+                    font_style: "H6"
+                    bold: True
+                    theme_text_color: "Custom"
+                    text_color: 1, 1, 1, 1
+                    pos_hint: {"center_y": 0.5}
+
+        ScrollView:
+            size_hint: (1, None)
+            height: "580dp"
+            pos_hint: {"top": 0.91}
+
+            MDBoxLayout:
+                orientation: "vertical"
+                padding: ["16dp", "12dp", "16dp", "40dp"]
+                spacing: "16dp"
+                size_hint_y: None
+                height: self.minimum_height
+
+                MDCard:
+                    size_hint: (1, None)
+                    height: "160dp"
+                    radius: [14, 14, 14, 14]
+                    padding: "12dp"
+                    md_bg_color: app.theme_cls.bg_light
+                    elevation: 0.5
+                    shadow_color: 0, 0, 0, 0.05
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        spacing: "10dp"
+
+                        MDLabel:
+                            text: "Pilih Avatar Kamu"
+                            font_style: "Subtitle2"
+                            bold: True
+                            halign: "center"
+                            theme_text_color: "Primary"
+
+                        MDCard:
+                            size_hint: None, None
+                            size: "48dp", "48dp"
+                            radius: [24, 24, 24, 24]
+                            pos_hint: {"center_x": 0.5}
+                            elevation: 0
+
+                            FitImage:
+                                id: avatar_preview_img
+                                source: "avatars/avatar1.png"
+                                radius: [24, 24, 24, 24]
+
+                        MDBoxLayout:
+                            orientation: "horizontal"
+                            spacing: "8dp"
+                            pos_hint: {"center_x": 0.5}
+                            size_hint: None, None
+                            width: "240dp"
+                            height: "40dp"
+
+                            MDCard:
+                                size_hint: None, None
+                                size: "40dp", "40dp"
+                                radius: [20, 20, 20, 20]
+                                on_release: root.select_avatar("avatars/avatar1.png")
+                                FitImage:
+                                    source: "avatars/avatar1.png"
+                                    radius: [20, 20, 20, 20]
+
+                            MDCard:
+                                size_hint: None, None
+                                size: "40dp", "40dp"
+                                radius: [20, 20, 20, 20]
+                                on_release: root.select_avatar("avatars/avatar2.png")
+                                FitImage:
+                                    source: "avatars/avatar2.png"
+                                    radius: [20, 20, 20, 20]
+
+                            MDCard:
+                                size_hint: None, None
+                                size: "40dp", "40dp"
+                                radius: [20, 20, 20, 20]
+                                on_release: root.select_avatar("avatars/avatar3.png")
+                                FitImage:
+                                    source: "avatars/avatar3.png"
+                                    radius: [20, 20, 20, 20]
+
+                            MDCard:
+                                size_hint: None, None
+                                size: "40dp", "40dp"
+                                radius: [20, 20, 20, 20]
+                                on_release: root.select_avatar("avatars/avatar4.png")
+                                FitImage:
+                                    source: "avatars/avatar4.png"
+                                    radius: [20, 20, 20, 20]
+
+                            MDCard:
+                                size_hint: None, None
+                                size: "40dp", "40dp"
+                                radius: [20, 20, 20, 20]
+                                on_release: root.select_avatar("avatars/avatar5.png")
+                                FitImage:
+                                    source: "avatars/avatar5.png"
+                                    radius: [20, 20, 20, 20]
+
+                MDCard:
+                    size_hint: (1, None)
+                    height: "170dp"
+                    radius: [14, 14, 14, 14]
+                    padding: "14dp"
+                    md_bg_color: app.theme_cls.bg_light
+                    elevation: 0.5
+                    shadow_color: 0, 0, 0, 0.05
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        spacing: "10dp"
+
+                        MDLabel:
+                            text: "Informasi Akun"
+                            font_style: "Subtitle2"
+                            bold: True
+                            theme_text_color: "Primary"
+
+                        MDTextField:
+                            id: edit_nama_input
+                            hint_text: "Nama Lengkap"
+                            icon_left: "account"
+
+                        MDTextField:
+                            id: edit_email_input
+                            hint_text: "Email"
+                            icon_left: "email"
+
+                MDCard:
+                    size_hint: (1, None)
+                    height: "220dp"
+                    radius: [14, 14, 14, 14]
+                    padding: "14dp"
+                    md_bg_color: app.theme_cls.bg_light
+                    elevation: 0.5
+                    shadow_color: 0, 0, 0, 0.05
+
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        spacing: "10dp"
+
+                        MDLabel:
+                            text: "Ubah Kata Sandi (Opsional)"
+                            font_style: "Subtitle2"
+                            bold: True
+                            theme_text_color: "Primary"
+
+                        MDTextField:
+                            id: pass_old
+                            hint_text: "Kata Sandi Lama"
+                            icon_left: "lock"
+                            password: True
+
+                        MDTextField:
+                            id: pass_new
+                            hint_text: "Kata Sandi Baru"
+                            icon_left: "lock-reset"
+                            password: True
+
+                        MDTextField:
+                            id: pass_confirm
+                            hint_text: "Konfirmasi Kata Sandi Baru"
+                            icon_left: "lock-check"
+                            password: True
+
+                MDRaisedButton:
+                    text: "SIMPAN PERUBAHAN"
+                    size_hint_x: 1
+                    height: "48dp"
+                    radius: [12, 12, 12, 12]
+                    md_bg_color: 0.12, 0.53, 0.90, 1
+                    on_release: root.save_changes()
