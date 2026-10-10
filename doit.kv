@@ -1,5 +1,17 @@
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 
+<CommonElevationBehavior>:
+    shadow_radius: [1, 1, 1, 1]
+
+<MDCard>:
+    shadow_radius: self.radius
+
+<DoitRaisedButton>:
+    shadow_radius: [6, 6, 6, 6]
+
+<MDIconButton>:
+    shadow_radius: [6, 6, 6, 6]
+
 ScreenManager:
     transition: NoTransition()
     LoginScreen:
@@ -70,7 +82,7 @@ ScreenManager:
                         pos_hint: {"right": 0.98, "center_y": 0.4}
                         on_release: root.toggle_password_visibility(self)
 
-                MDRaisedButton:
+                DoitRaisedButton:
                     text: "MASUK"
                     size_hint_x: 1
                     height: "48dp"
@@ -141,7 +153,7 @@ ScreenManager:
                     password: True
                     mode: "rectangle"
 
-                MDRaisedButton:
+                DoitRaisedButton:
                     text: "DAFTAR"
                     size_hint_x: 1
                     height: "48dp"
@@ -192,6 +204,7 @@ ScreenManager:
                         text_color: 0.9, 0.95, 1, 1
 
                 MDCard:
+                    id: badge_pemula
                     size_hint: None, None
                     size: "90dp", "38dp"
                     radius: [12, 12, 12, 12]
@@ -249,7 +262,7 @@ ScreenManager:
                         height: "40dp"
                         spacing: "10dp"
 
-                        MDRaisedButton:
+                        DoitRaisedButton:
                             id: btn_tugas
                             text: "Tugas"
                             size_hint_x: 0.5
@@ -259,7 +272,7 @@ ScreenManager:
                             text_color: 1, 1, 1, 1
                             on_release: root.switch_filter("Tugas")
 
-                        MDRaisedButton:
+                        DoitRaisedButton:
                             id: btn_kebiasaan
                             text: "Kebiasaan"
                             size_hint_x: 0.5
@@ -344,7 +357,7 @@ ScreenManager:
                         height: "36dp"
                         spacing: "8dp"
 
-                        MDRaisedButton:
+                        DoitRaisedButton:
                             id: btn_chart_weekly
                             text: "Mingguan"
                             size_hint_x: 0.5
@@ -354,7 +367,7 @@ ScreenManager:
                             text_color: 1, 1, 1, 1
                             on_release: root.set_chart_mode("weekly")
 
-                        MDRaisedButton:
+                        DoitRaisedButton:
                             id: btn_chart_monthly
                             text: "Bulanan (4 Mingu)"
                             size_hint_x: 0.5
@@ -491,7 +504,7 @@ ScreenManager:
 
                         MDCard:
                             size_hint: (1, None)
-                            height: "105dp"
+                            height: "130dp"
                             radius: [16, 16, 16, 16]
                             padding: "14dp"
                             md_bg_color: app.theme_cls.bg_light
@@ -508,35 +521,119 @@ ScreenManager:
                                     bold: True
                                     theme_text_color: "Primary"
 
-                                ScrollView:
-                                    do_scroll_y: False
-                                    do_scroll_x: True
-                                    bar_width: 0
+                                MDBoxLayout:
+                                    orientation: "horizontal"
+                                    spacing: "8dp"
+                                    size_hint_y: None
+                                    height: "68dp"
 
-                                    MDBoxLayout:
-                                        orientation: "horizontal"
-                                        spacing: "8dp"
-                                        size_hint_x: None
-                                        width: self.minimum_width
+                                    MDCard:
+                                        id: badge_pemula
+                                        size_hint: None, None
+                                        size: "64dp", "68dp"
+                                        radius: [12, 12, 12, 12]
+                                        elevation: 0
+                                        md_bg_color: 1, 0.95, 0.82, 1
 
-                                        MDChip:
-                                            id: badge_pemula
-                                            text: "Pemula"
-                                            icon: "star"
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            spacing: "2dp"
 
-                                        MDChip:
-                                            id: badge_konsisten
-                                            text: "Konsisten"
-                                            icon: "fire"
+                                            MDIcon:
+                                                id: badge_pemula_icon
+                                                icon: "star"
+                                                theme_text_color: "Custom"
+                                                text_color: 0.9, 0.58, 0.08, 1
+                                                font_size: "22sp"
 
-                                        MDChip:
-                                            id: badge_produktif
-                                            text: "Produktif"
-                                            icon: "trophy"
+                                            MDLabel:
+                                                id: badge_pemula_label
+                                                text: "Pemula\n4 tugas"
+                                                halign: "center"
+                                                font_style: "Caption"
+                                                bold: True
+                                                theme_text_color: "Primary"
 
-                                        MDChip:
-                                            text: "Master"
-                                            icon: "crown"
+                                    MDCard:
+                                        id: badge_konsisten
+                                        size_hint: None, None
+                                        size: "74dp", "68dp"
+                                        radius: [12, 12, 12, 12]
+                                        elevation: 0
+                                        md_bg_color: 1, 0.88, 0.84, 1
+
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            spacing: "2dp"
+
+                                            MDIcon:
+                                                id: badge_konsisten_icon
+                                                icon: "fire"
+                                                theme_text_color: "Custom"
+                                                text_color: 0.88, 0.3, 0.12, 1
+                                                font_size: "22sp"
+
+                                            MDLabel:
+                                                id: badge_konsisten_label
+                                                text: "Konsisten\n20 tugas"
+                                                halign: "center"
+                                                font_style: "Caption"
+                                                bold: True
+                                                theme_text_color: "Primary"
+
+                                    MDCard:
+                                        id: badge_produktif
+                                        size_hint: None, None
+                                        size: "74dp", "68dp"
+                                        radius: [12, 12, 12, 12]
+                                        elevation: 0
+                                        md_bg_color: 0.84, 0.94, 0.87, 1
+
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            spacing: "2dp"
+
+                                            MDIcon:
+                                                id: badge_produktif_icon
+                                                icon: "trophy"
+                                                theme_text_color: "Custom"
+                                                text_color: 0.13, 0.55, 0.32, 1
+                                                font_size: "22sp"
+
+                                            MDLabel:
+                                                id: badge_produktif_label
+                                                text: "Produktif\n50 tugas"
+                                                halign: "center"
+                                                font_style: "Caption"
+                                                bold: True
+                                                theme_text_color: "Primary"
+
+                                    MDCard:
+                                        id: badge_master
+                                        size_hint: None, None
+                                        size: "64dp", "68dp"
+                                        radius: [12, 12, 12, 12]
+                                        elevation: 0
+                                        md_bg_color: 0.89, 0.86, 0.97, 1
+
+                                        MDBoxLayout:
+                                            orientation: "vertical"
+                                            spacing: "2dp"
+
+                                            MDIcon:
+                                                id: badge_master_icon
+                                                icon: "crown"
+                                                theme_text_color: "Custom"
+                                                text_color: 0.43, 0.25, 0.68, 1
+                                                font_size: "22sp"
+
+                                            MDLabel:
+                                                id: badge_master_label
+                                                text: "Master\n100 tugas"
+                                                halign: "center"
+                                                font_style: "Caption"
+                                                bold: True
+                                                theme_text_color: "Primary"
 
                         MDCard:
                             size_hint: (1, None)
@@ -599,7 +696,7 @@ ScreenManager:
                                         active: True
                                         pos_hint: {"center_y": 0.5}
 
-                        MDRaisedButton:
+                        DoitRaisedButton:
                             text: "KELUAR (LOGOUT)"
                             size_hint_x: 1
                             height: "48dp"
@@ -851,7 +948,7 @@ ScreenManager:
                             icon_left: "lock-check"
                             password: True
 
-                MDRaisedButton:
+                DoitRaisedButton:
                     text: "SIMPAN PERUBAHAN"
                     size_hint_x: 1
                     height: "48dp"

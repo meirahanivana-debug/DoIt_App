@@ -204,8 +204,10 @@ def add_task(user_id, user_email, judul, kategori, tipe, deadline=None):
         INSERT INTO tasks (user_id, user_email, judul, kategori, tipe, status, deadline) 
         VALUES (?, ?, ?, ?, ?, 'Belum', ?)
     """, (user_id, user_email, judul, kategori, tipe, deadline))
+    task_id = cursor.lastrowid
     conn.commit()
     conn.close()
+    return task_id
 
 def update_task(task_id, judul, kategori, deadline=None):
     conn = sqlite3.connect(DB_NAME)
@@ -267,6 +269,17 @@ def get_user_stats(user_id):
     completed = cursor.fetchone()[0]
     conn.close()
     return total, completed
+
+def get_pending_tasks_by_user(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, judul, deadline FROM tasks
+        WHERE user_id = ? AND status = 'Belum' AND deadline IS NOT NULL AND deadline != ''
+    """, (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
 
 def get_completion_dates_by_user(user_id):
     conn = sqlite3.connect(DB_NAME)
