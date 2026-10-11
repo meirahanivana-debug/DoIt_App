@@ -9,6 +9,8 @@ except ImportError:
 
 from kivy.utils import platform
 from kivy.config import Config
+from kivy.properties import VariableListProperty
+from kivy.logger import Logger
 
 if platform != "android":
     Config.set('graphics', 'width', '360')
@@ -31,6 +33,27 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconRightWidget
 from kivymd.uix.pickers import MDDatePicker, MDTimePicker
+
+
+DEFAULT_AVATAR = "avatars/avatar1.png"
+ACHIEVEMENT_THRESHOLDS = (
+    ("badge_pemula", 4, (1, 0.95, 0.82, 1), (0.9, 0.58, 0.08, 1), "Pemula"),
+    ("badge_konsisten", 20, (1, 0.88, 0.84, 1), (0.88, 0.3, 0.12, 1), "Konsisten"),
+    ("badge_produktif", 50, (0.84, 0.94, 0.87, 1), (0.13, 0.55, 0.32, 1), "Produktif"),
+    ("badge_master", 100, (0.89, 0.86, 0.97, 1), (0.43, 0.25, 0.68, 1), "Master"),
+)
+AVATAR_PATHS = {
+    f"avatars/avatar{index}.png"
+    for index in range(1, 6)
+}
+
+
+def normalize_avatar_path(path):
+    return path if path in AVATAR_PATHS else DEFAULT_AVATAR
+
+
+class DoitRaisedButton(MDRaisedButton):
+    shadow_radius = VariableListProperty([6, 6, 6, 6], length=4)
 
 
 class LoginScreen(Screen):
@@ -175,7 +198,8 @@ class MainScreen(Screen):
         self.ids.greeting_label.text = f"{salam}, {app.current_user_nama}!"
         self.ids.profile_nama.text = app.current_user_nama
         self.ids.profile_email.text = app.current_user_email
-        self.ids.profile_avatar_img.source = app.current_user_avatar if app.current_user_avatar else "avatars/avatar1.png"
+        app.current_user_avatar = normalize_avatar_path(app.current_user_avatar)
+        self.ids.profile_avatar_img.source = app.current_user_avatar
         
         created_at_val = app.current_user_created_at
         if created_at_val and created_at_val != "-":
@@ -195,6 +219,7 @@ class MainScreen(Screen):
         self.update_streak()
         self.load_chart_data()
         self.load_user_stats()
+        self.sync_pending_deadline_reminders()
 
     def apply_header_color(self):
         header_color = (0.12, 0.53, 0.90, 1)
@@ -227,7 +252,22 @@ class MainScreen(Screen):
             self.ids.main_header.opacity = 0
 
     def load_user_stats(self):
-        pass
+        app = MDApp.get_running_app()
+        if not app.current_user_id:
+            return
+
+        _, completed = database.get_user_stats(app.current_user_id)
+        for badge_id, threshold, active_background, active_icon, badge_name in ACHIEVEMENT_THRESHOLDS:
+            earned = completed >= threshold
+            card = self.ids[badge_id]
+            card.md_bg_color = active_background if earned else (0.88, 0.89, 0.91, 1)
+            icon = self.ids[f"{badge_id}_icon"]
+            label = self.ids[f"{badge_id}_label"]
+            icon.text_color = active_icon if earned else (0.52, 0.54, 0.57, 1)
+            label.text = f"{badge_name}\n{threshold} tugas"
+            label.theme_text_color = "Primary" if earned else "Custom"
+            if not earned:
+                label.text_color = (0.48, 0.5, 0.53, 1)
 
     def switch_filter(self, filter_type):
         self.current_filter = filter_type
@@ -421,6 +461,7 @@ class MainScreen(Screen):
 
     def execute_mark_done(self, task_id):
         database.update_task_status(task_id, "Selesai")
+        self.cancel_deadline_reminders(task_id)
         self.load_tasks()
         self.load_history()
         self.update_streak()
@@ -429,6 +470,7 @@ class MainScreen(Screen):
 
     def delete_task(self, task_id):
         database.delete_task(task_id)
+        self.cancel_deadline_reminders(task_id)
         self.load_tasks()
         self.load_user_stats()
 
@@ -759,7 +801,7 @@ class MainScreen(Screen):
             content_cls=content,
             buttons=[
                 MDFlatButton(text="BATAL", on_release=lambda x: self.dialog.dismiss()),
-                MDRaisedButton(
+                DoitRaisedButton(
                     text="SIMPAN",
                     md_bg_color=(0.12, 0.53, 0.90, 1),
                     on_release=lambda x: self.save_task()
@@ -821,10 +863,22 @@ class MainScreen(Screen):
             self.category_menu.dismiss()
 
     def trigger_task_notification(self, judul, deadline_str):
-        if not PLYER_AVAILABLE:
-            return
-        
         try:
+            if platform == "android":
+                from jnius import autoclass
+
+                activity = autoclass("org.kivy.android.PythonActivity").mActivity
+                autoclass("org.doit.doitapp.DeadlineReminderScheduler").notifyNow(
+                    activity,
+                    judul,
+                    f"Tugas baru: '{judul}' memiliki deadline hari ini ({deadline_str}).",
+                )
+                return
+
+            if not PLYER_AVAILABLE:
+                Logger.warning("DoIt: Plyer notification backend is unavailable")
+                return
+
             notif_title = "Pengingat Tugas DoIt!"
             notif_text = f"Tugas baru: '{judul}' berhasil dijadwalkan."
             if deadline_str:
@@ -836,8 +890,65 @@ class MainScreen(Screen):
                 app_name="DoIt",
                 app_icon=""
             )
-        except Exception as e:
-            print(f"Gagal memicu notifikasi: {e}")
+        except Exception:
+            Logger.exception("DoIt: gagal mengirim notifikasi deadline")
+
+    @staticmethod
+    def _parse_deadline(deadline_str):
+        if len(deadline_str) > 10:
+            return datetime.strptime(deadline_str, "%Y-%m-%d %H:%M")
+        return datetime.strptime(deadline_str, "%Y-%m-%d").replace(hour=23, minute=59)
+
+    def schedule_deadline_reminders(self, task_id, judul, deadline_str):
+        if platform != "android" or not deadline_str:
+            return
+
+        try:
+            deadline = self._parse_deadline(deadline_str)
+            now = datetime.now()
+            if deadline <= now:
+                return
+
+            from jnius import autoclass
+
+            activity = autoclass("org.kivy.android.PythonActivity").mActivity
+            scheduler = autoclass("org.doit.doitapp.DeadlineReminderScheduler")
+            for offset_hours in (24, 1):
+                reminder_time = deadline - timedelta(hours=offset_hours)
+                if reminder_time <= now:
+                    continue
+                message = f"Deadline tugas '{judul}' dalam {offset_hours} jam."
+                scheduler.schedule(
+                    activity,
+                    int(task_id),
+                    int(offset_hours),
+                    int(reminder_time.timestamp() * 1000),
+                    "Pengingat Deadline DoIt",
+                    message,
+                )
+        except Exception:
+            Logger.exception("DoIt: gagal menjadwalkan pengingat deadline")
+
+    def cancel_deadline_reminders(self, task_id):
+        if platform != "android":
+            return
+        try:
+            from jnius import autoclass
+
+            activity = autoclass("org.kivy.android.PythonActivity").mActivity
+            autoclass("org.doit.doitapp.DeadlineReminderScheduler").cancelTask(
+                activity, int(task_id)
+            )
+        except Exception:
+            Logger.exception("DoIt: gagal membatalkan pengingat deadline")
+
+    def sync_pending_deadline_reminders(self):
+        app = MDApp.get_running_app()
+        if platform != "android" or not app.current_user_id:
+            return
+
+        for task_id, judul, deadline in database.get_pending_tasks_by_user(app.current_user_id):
+            self.schedule_deadline_reminders(task_id, judul, deadline)
 
     def save_task(self):
         judul = self.input_judul.text.strip()
@@ -862,11 +973,28 @@ class MainScreen(Screen):
         if judul:
             app = MDApp.get_running_app()
             if self.editing_task_id:
-                database.update_task(self.editing_task_id, judul, kategori, deadline)
+                task_id = self.editing_task_id
+                database.update_task(task_id, judul, kategori, deadline)
+                self.cancel_deadline_reminders(task_id)
             else:
-                database.add_task(app.current_user_id, app.current_user_email, judul, kategori, self.current_filter, deadline)
-            
-            self.trigger_task_notification(judul, deadline)
+                task_id = database.add_task(
+                    app.current_user_id,
+                    app.current_user_email,
+                    judul,
+                    kategori,
+                    self.current_filter,
+                    deadline,
+                )
+
+            self.schedule_deadline_reminders(task_id, judul, deadline)
+            if not self.editing_task_id and deadline:
+                try:
+                    due_date = self._parse_deadline(deadline).date()
+                except ValueError:
+                    Logger.exception("DoIt: format deadline tidak valid")
+                    due_date = None
+                if due_date == datetime.now().date():
+                    self.trigger_task_notification(judul, deadline)
 
             self.dialog.dismiss()
             self.load_tasks()
@@ -874,7 +1002,7 @@ class MainScreen(Screen):
 
     def open_manage_categories_dialog(self):
         self.input_new_cat = MDTextField(hint_text="Kategori Baru", size_hint_x=0.7)
-        btn_add = MDRaisedButton(
+        btn_add = DoitRaisedButton(
             text="Tambah",
             size_hint_x=0.3,
             md_bg_color=(0.12, 0.53, 0.90, 1),
@@ -945,7 +1073,7 @@ class MainScreen(Screen):
                     text_color=(0.3, 0.3, 0.3, 1),
                     on_release=lambda x: self.logout_dialog.dismiss()
                 ),
-                MDRaisedButton(
+                DoitRaisedButton(
                     text="Ya, Keluar",
                     md_bg_color=(0.88, 0.2, 0.2, 1),
                     on_release=lambda x: self.execute_logout()
@@ -977,7 +1105,7 @@ class EditProfileScreen(Screen):
         app = MDApp.get_running_app()
         self.ids.edit_nama_input.text = app.current_user_nama
         self.ids.edit_email_input.text = app.current_user_email
-        self.selected_avatar = app.current_user_avatar if app.current_user_avatar else "avatars/avatar1.png"
+        self.selected_avatar = normalize_avatar_path(app.current_user_avatar)
         self.ids.avatar_preview_img.source = self.selected_avatar
 
         self.ids.pass_old.text = ""
@@ -985,8 +1113,8 @@ class EditProfileScreen(Screen):
         self.ids.pass_confirm.text = ""
 
     def select_avatar(self, avatar_path):
-        self.selected_avatar = avatar_path
-        self.ids.avatar_preview_img.source = avatar_path
+        self.selected_avatar = normalize_avatar_path(avatar_path)
+        self.ids.avatar_preview_img.source = self.selected_avatar
 
     def save_changes(self):
         app = MDApp.get_running_app()
@@ -1015,6 +1143,7 @@ class EditProfileScreen(Screen):
             database.update_user_password(app.current_user_id, pass_new)
             app.current_user_password = pass_new
 
+        self.selected_avatar = normalize_avatar_path(self.selected_avatar)
         success = database.update_user_profile(app.current_user_id, nama, email, self.selected_avatar)
         if success:
             app.current_user_nama = nama
@@ -1059,7 +1188,7 @@ class DoItApp(MDApp):
         self.current_user_nama = ""
         self.current_user_email = ""
         self.current_user_password = ""
-        self.current_user_avatar = "avatars/avatar1.png"
+        self.current_user_avatar = DEFAULT_AVATAR
         self.current_user_created_at = "-"
 
         database.init_db()
@@ -1072,12 +1201,12 @@ class DoItApp(MDApp):
                 self.current_user_nama = user[1]
                 self.current_user_email = user[2]
                 self.current_user_password = user[3]
-                self.current_user_avatar = user[4] if len(user) > 4 and user[4] else "avatars/avatar1.png"
+                self.current_user_avatar = normalize_avatar_path(user[4] if len(user) > 4 else None)
                 self.current_user_created_at = user[5] if len(user) > 5 and user[5] else "-"
                 
                 Clock.schedule_once(lambda dt: self.to_main_screen(), 0.1)
 
-        return Builder.load_file("doit.kv")
+        return self.root or Builder.load_file("doit.kv")
 
     def on_start(self):
         if platform == "android":
