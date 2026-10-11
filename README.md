@@ -1,49 +1,90 @@
 # DoIt! — Aplikasi Todo List & Habit Tracker
 
-Aplikasi Android untuk membantu pengguna mengelola tugas, mengatur deadline, membangun kebiasaan positif, dan memantau progres penyelesaian tugas.
+DoIt! adalah aplikasi Android yang dirancang untuk membantu pengguna mengelola tugas, mengatur deadline, membangun kebiasaan positif, dan memantau perkembangan aktivitas sehari-hari.
+
+Aplikasi ini dikembangkan menggunakan Python, Kivy/KivyMD, SQLite, serta komponen Java untuk mendukung integrasi dengan sistem Android.
 
 ## 📌 Tentang Aplikasi
 
-**DoIt!** adalah aplikasi manajemen tugas dan kebiasaan yang dikembangkan untuk membantu pengguna mengatur aktivitas sehari-hari agar lebih terorganisir dan produktif.
-
-Aplikasi ini dikembangkan menggunakan Python dengan framework Kivy/KivyMD untuk antarmuka pengguna serta SQLite untuk penyimpanan data lokal.
+DoIt! bertujuan membantu pengguna menjadi lebih terorganisir dan produktif melalui pengelolaan tugas dan kebiasaan dalam satu aplikasi.
 
 ### Tujuan Aplikasi
 
-- Membantu pengguna mencatat dan mengelola tugas.
-- Memudahkan pengguna menentukan tanggal dan waktu deadline.
+- Memudahkan pengguna mencatat dan mengelola tugas.
+- Membantu pengguna menentukan tanggal dan waktu deadline.
 - Membantu pengguna membangun kebiasaan positif.
-- Menyediakan riwayat tugas yang telah diselesaikan.
-- Menampilkan statistik dan streak untuk memantau konsistensi pengguna.
+- Menyediakan riwayat penyelesaian tugas.
+- Menampilkan statistik dan streak aktivitas.
 - Memberikan pengingat deadline melalui notifikasi Android.
 
 ## ✨ Fitur Aplikasi
 
-1. **Registrasi dan Login** — Pengguna dapat membuat akun dan masuk ke aplikasi.
-2. **Beranda** — Menampilkan halaman utama untuk mengakses fitur aplikasi.
-3. **Manajemen Tugas** — Menambahkan, mengedit, menghapus, dan menyelesaikan tugas.
-4. **Kategori Aktivitas** — Memisahkan tugas dan kebiasaan.
-5. **Deadline Tugas** — Menentukan tanggal dan waktu penyelesaian tugas.
-6. **Notifikasi Pengingat** — Membantu mengingatkan pengguna tentang deadline.
-7. **Statistik Aktivitas** — Menampilkan informasi penyelesaian tugas.
-8. **Streak Kebiasaan** — Menghitung konsistensi penyelesaian aktivitas harian.
-9. **Riwayat Selesai** — Menampilkan tugas yang telah diselesaikan.
-10. **Profil Pengguna** — Mengelola informasi profil dan avatar.
-11. **Pencapaian** — Memberikan pencapaian berdasarkan jumlah tugas yang selesai.
-12. **Pusat Bantuan** — Menyediakan informasi penggunaan aplikasi.
-13. **Logout** — Mengakhiri sesi pengguna.
+1. **Registrasi dan Login** — Membuat akun dan masuk ke aplikasi.
+2. **Beranda** — Mengakses daftar tugas dan kebiasaan.
+3. **Tambah Tugas/Kebiasaan** — Menambahkan aktivitas baru.
+4. **Pengaturan Deadline** — Menentukan tanggal dan waktu tugas.
+5. **Edit dan Hapus Tugas** — Mengubah atau menghapus aktivitas.
+6. **Penyelesaian Tugas** — Menandai aktivitas yang telah selesai.
+7. **Statistik Mingguan** — Melihat informasi penyelesaian tugas mingguan.
+8. **Statistik Bulanan** — Melihat ringkasan statistik berdasarkan periode yang disediakan aplikasi.
+9. **Streak dan Riwayat** — Memantau konsistensi dan melihat tugas yang selesai.
+10. **Profil Pengguna** — Melihat dan mengubah informasi profil.
+11. **Notifikasi Deadline** — Memberikan pengingat tugas sesuai konfigurasi aplikasi.
+12. **Pencapaian** — Melihat pencapaian berdasarkan jumlah tugas selesai.
+13. **Pusat Bantuan** — Membaca panduan penggunaan aplikasi.
+14. **Logout** — Keluar dari sesi akun.
 
-## 📱 Manual Book (Panduan Pengguna)
+## 📸 Tampilan Aplikasi
 
-Bagian ini menjelaskan cara menggunakan aplikasi DoIt! dari awal hingga akhir.
+Berikut adalah tujuh screenshot antarmuka aplikasi DoIt!.
+
+### 1. Beranda
+
+![Tampilan Beranda DoIt!](screenshots/beranda.png)
+
+Halaman beranda merupakan halaman utama untuk melihat daftar tugas dan kebiasaan serta mengakses menu yang tersedia.
+
+### 2. Tambah Tugas/Kebiasaan
+
+![Tampilan Tambah Tugas dan Kebiasaan](screenshots/tambah-tugas.png)
+
+Halaman ini digunakan untuk menambahkan tugas atau kebiasaan baru. Pengguna dapat mengisi informasi aktivitas, memilih kategori, dan menentukan deadline jika tersedia.
+
+### 3. Statistik Mingguan
+
+![Tampilan Statistik Mingguan](screenshots/statistik-mingguan.png)
+
+Halaman ini menampilkan ringkasan penyelesaian tugas mingguan untuk membantu pengguna mengevaluasi aktivitas dan produktivitasnya.
+
+### 4. Statistik Bulanan
+
+![Tampilan Statistik Bulanan](screenshots/statistik-bulanan.png)
+
+Halaman ini menampilkan ringkasan statistik berdasarkan periode yang disediakan aplikasi sehingga pengguna dapat melihat perkembangan penyelesaian tugas.
+
+### 5. Halaman Profil
+
+![Tampilan Profil DoIt!](screenshots/profil.png)
+
+Halaman profil menampilkan informasi pengguna dan menyediakan akses ke fitur pengelolaan akun serta pengaturan aplikasi.
+
+### 6. Konfirmasi Logout
+
+![Tampilan Logout DoIt!](screenshots/logout.png)
+
+Halaman atau dialog logout digunakan untuk mengonfirmasi tindakan keluar dari akun sebelum aplikasi kembali ke halaman login.
+
+### 7. Edit Profil
+
+![Tampilan Edit Profil DoIt!](screenshots/edit-profil.png)
+
+Halaman edit profil digunakan untuk mengubah informasi akun yang didukung aplikasi, seperti nama pengguna atau foto profil.
+
+## 📖 Manual Book (Panduan Pengguna)
 
 ### 1. Persiapan
 
-Pastikan pengguna memiliki perangkat Android yang kompatibel dengan versi aplikasi yang dipasang.
-
-Jika aplikasi dibagikan dalam bentuk APK, unduh berkas APK dari sumber yang disediakan oleh pengembang. Pasang aplikasi sesuai petunjuk perangkat Android.
-
-> Catatan: Nama berkas APK dan versi Android yang didukung dapat ditambahkan setelah informasi build final tersedia.
+Pastikan aplikasi DoIt! telah dipasang pada perangkat Android yang kompatibel. Jika aplikasi tersedia dalam bentuk APK, gunakan file APK yang diberikan oleh pengembang.
 
 ### 2. Registrasi Akun
 
@@ -51,142 +92,99 @@ Jika aplikasi dibagikan dalam bentuk APK, unduh berkas APK dari sumber yang dise
 2. Pilih menu registrasi jika belum memiliki akun.
 3. Isi informasi yang diminta, seperti nama, alamat email, dan kata sandi.
 4. Tekan tombol registrasi.
-5. Setelah pendaftaran berhasil, masuk menggunakan akun yang telah dibuat.
+5. Setelah berhasil, masuk menggunakan akun yang telah dibuat.
 
-**Catatan:** Ikuti format email dan ketentuan kata sandi yang diterapkan oleh aplikasi.
+**Catatan:** Ikuti format email dan ketentuan kata sandi yang diterapkan aplikasi.
 
 ### 3. Login
 
 1. Buka aplikasi DoIt!.
 2. Masukkan alamat email dan kata sandi yang telah didaftarkan.
 3. Tekan tombol Login.
-4. Jika data akun sesuai, aplikasi akan membuka halaman utama.
+4. Jika data sesuai, aplikasi akan membuka halaman utama.
 
-Jika login gagal, periksa kembali email dan kata sandi yang dimasukkan.
+Jika login gagal, periksa kembali informasi akun yang dimasukkan.
 
 ### 4. Menggunakan Beranda
 
-Beranda merupakan halaman utama untuk mengakses fitur DoIt!.
-
-Dari halaman ini, pengguna dapat melihat dan mengelola aktivitas, berpindah antara daftar tugas dan kebiasaan, serta mengakses statistik, riwayat, dan profil sesuai menu yang tersedia.
+1. Buka halaman utama setelah berhasil login.
+2. Lihat daftar tugas dan kebiasaan.
+3. Pilih menu atau tab yang sesuai untuk mengakses aktivitas.
+4. Gunakan menu navigasi untuk membuka statistik, riwayat, atau profil.
 
 ### 5. Menambahkan Tugas atau Kebiasaan
 
-1. Buka halaman utama.
-2. Pilih menu atau tombol untuk menambahkan aktivitas.
-3. Masukkan nama tugas atau kebiasaan.
-4. Pilih kategori yang sesuai.
-5. Tentukan tanggal dan waktu deadline jika diperlukan.
-6. Simpan aktivitas.
-7. Pastikan aktivitas muncul pada daftar yang sesuai.
+1. Tekan tombol tambah aktivitas.
+2. Masukkan nama tugas atau kebiasaan.
+3. Pilih kategori yang sesuai.
+4. Tentukan tanggal dan waktu deadline jika diperlukan.
+5. Simpan aktivitas.
+6. Pastikan aktivitas muncul pada daftar yang sesuai.
 
-Periksa kembali informasi aktivitas sebelum menyimpannya agar tidak terjadi kesalahan.
+### 6. Mengedit atau Menghapus Tugas
 
-### 6. Melihat Daftar Tugas dan Kebiasaan
+1. Cari aktivitas yang ingin diubah atau dihapus.
+2. Pilih tindakan edit atau hapus.
+3. Jika mengedit, ubah informasi yang diperlukan lalu simpan.
+4. Jika menghapus, pastikan aktivitas yang dipilih benar sebelum mengonfirmasi.
 
-1. Buka halaman utama.
-2. Pilih tab **Tugas** untuk melihat tugas.
-3. Pilih tab **Kebiasaan** untuk melihat kebiasaan.
-4. Cari aktivitas yang ingin dikelola.
+### 7. Menyelesaikan Tugas
 
-Daftar ditampilkan berdasarkan jenis aktivitas dan statusnya sesuai pengaturan aplikasi.
-
-### 7. Mengedit Tugas
-
-1. Cari tugas yang ingin diubah.
-2. Buka pilihan edit pada tugas tersebut.
-3. Ubah informasi yang diperlukan, seperti nama, kategori, tanggal, atau waktu.
-4. Simpan perubahan.
-5. Periksa kembali informasi tugas pada daftar.
-
-### 8. Menghapus Tugas
-
-1. Pilih tugas yang ingin dihapus.
-2. Tekan tombol atau pilihan hapus.
-3. Konfirmasikan tindakan jika aplikasi menampilkan dialog konfirmasi.
-
-Pastikan tugas yang dipilih benar sebelum menghapusnya.
-
-### 9. Menyelesaikan Tugas
-
-1. Cari tugas yang telah selesai dikerjakan.
+1. Cari aktivitas yang telah selesai dikerjakan.
 2. Tekan tombol atau kotak centang penyelesaian.
 3. Aplikasi akan memperbarui status tugas.
-4. Tugas yang selesai tidak lagi ditampilkan pada daftar tugas aktif dan dapat dilihat melalui riwayat penyelesaian.
+4. Periksa riwayat atau statistik untuk melihat pembaruan yang tersedia.
 
-### 10. Menggunakan Notifikasi Deadline
+### 8. Menggunakan Notifikasi Deadline
 
-1. Pastikan izin notifikasi diberikan apabila diminta oleh Android.
-2. Tambahkan tugas dengan tanggal dan waktu deadline.
-3. Pastikan jadwal pengingat dibuat oleh aplikasi.
-4. Perhatikan notifikasi yang muncul pada perangkat.
+1. Pastikan izin notifikasi diberikan jika diminta oleh Android.
+2. Buat tugas dan tentukan deadline.
+3. Pastikan pengingat dijadwalkan oleh aplikasi.
+4. Periksa notifikasi yang muncul pada perangkat.
 
-Notifikasi bergantung pada izin Android, pengaturan perangkat, dan keberhasilan penjadwalan pengingat. Pengguna sebaiknya tidak mengandalkan notifikasi sebagai satu-satunya pengingat deadline penting.
+Notifikasi bergantung pada izin, pengaturan perangkat, dan konfigurasi penjadwalan aplikasi.
 
-### 11. Melihat Statistik
+### 9. Melihat Statistik Mingguan dan Bulanan
 
 1. Buka menu statistik.
-2. Lihat informasi penyelesaian tugas yang tersedia.
-3. Gunakan pilihan periode apabila tersedia.
-4. Perhatikan perubahan statistik setelah menyelesaikan tugas.
+2. Pilih periode mingguan atau bulanan jika tersedia.
+3. Perhatikan ringkasan penyelesaian tugas.
+4. Gunakan informasi tersebut untuk mengevaluasi aktivitas.
 
-Statistik membantu pengguna mengevaluasi produktivitas dan perkembangan aktivitasnya.
-
-### 12. Melihat Streak dan Riwayat
+### 10. Melihat Streak dan Riwayat
 
 1. Buka bagian statistik atau riwayat.
-2. Perhatikan kartu streak untuk melihat konsistensi aktivitas.
-3. Buka daftar riwayat selesai untuk melihat aktivitas yang telah diselesaikan.
-4. Periksa nama aktivitas dan tanggal penyelesaiannya.
+2. Periksa informasi streak yang ditampilkan.
+3. Lihat daftar aktivitas yang telah selesai.
+4. Perhatikan nama tugas dan tanggal penyelesaiannya.
 
-Streak menunjukkan rangkaian hari aktif sesuai perhitungan aplikasi. Hasilnya dapat bergantung pada aturan penghitungan streak yang diterapkan.
-
-### 13. Menggunakan Fitur Pencapaian
-
-1. Selesaikan tugas melalui aplikasi.
-2. Buka bagian statistik atau pencapaian.
-3. Periksa jumlah tugas selesai dan pencapaian yang telah diperoleh.
-
-Pencapaian diberikan berdasarkan ketentuan jumlah tugas selesai yang diterapkan aplikasi.
-
-### 14. Mengelola Profil
+### 11. Mengelola Profil
 
 1. Buka menu Profil.
 2. Periksa informasi akun.
-3. Pilih opsi ubah profil untuk memperbarui informasi yang tersedia.
-4. Simpan perubahan.
-5. Jika ingin mengganti kata sandi, ikuti petunjuk yang ditampilkan aplikasi.
+3. Pilih opsi edit profil.
+4. Ubah informasi yang diperlukan.
+5. Simpan perubahan.
 
-### 15. Menggunakan Pusat Bantuan
+### 12. Logout
 
-1. Buka menu bantuan.
-2. Pilih pertanyaan yang sesuai dengan kendala.
-3. Baca penjelasan yang tersedia.
-4. Ikuti petunjuk penyelesaian masalah.
-
-### 16. Logout
-
-1. Buka pilihan Logout.
-2. Baca konfirmasi yang ditampilkan.
-3. Pilih konfirmasi jika ingin keluar dari akun.
+1. Tekan tombol Logout.
+2. Periksa dialog konfirmasi.
+3. Konfirmasikan jika ingin keluar dari akun.
 4. Aplikasi akan kembali ke halaman login.
-
-Pastikan kamu mengetahui informasi akun sebelum keluar agar dapat login kembali.
 
 ## 🛠️ Teknologi yang Digunakan
 
-| Teknologi | Kegunaan |
+| Teknologi | Fungsi |
 |---|---|
-| Python | Bahasa pemrograman untuk logika aplikasi |
-| Kivy | Framework untuk antarmuka aplikasi |
+| Python | Logika utama aplikasi |
+| Kivy | Pengembangan antarmuka aplikasi |
 | KivyMD | Komponen antarmuka bergaya Material Design |
 | SQLite | Penyimpanan data lokal |
-| Java Android | Mendukung komponen integrasi dengan sistem Android, termasuk pengingat |
-| VS Code | Lingkungan pengembangan kode |
+| Java Android | Mendukung integrasi dengan sistem Android |
+| Visual Studio Code | Lingkungan pengembangan kode |
 
 ## 📂 Struktur Proyek
-
-Berikut gambaran beberapa berkas utama dalam proyek:
 
 ```text
 DoItApp/
@@ -196,79 +194,78 @@ DoItApp/
 ├── android_src/
 │   └── org/
 │       └── ...
+├── screenshots/
+│   ├── beranda.png
+│   ├── tambah-tugas.png
+│   ├── statistik-mingguan.png
+│   ├── statistik-bulanan.png
+│   ├── profil.png
+│   ├── logout.png
+│   └── edit-profil.png
 └── README.md
 ```
 
-Keterangan:
+**Keterangan:**
 
-- `main.py` — Menangani logika utama aplikasi, alur halaman, dan interaksi pengguna.
-- `database.py` — Menangani operasi database, seperti menyimpan, membaca, memperbarui, dan menghapus data.
-- `doit.kv` — Mendefinisikan tata letak dan komponen antarmuka Kivy.
+- `main.py` — Menangani logika utama, alur halaman, dan interaksi pengguna.
+- `database.py` — Mengelola operasi penyimpanan dan pengambilan data.
+- `doit.kv` — Mendefinisikan tata letak antarmuka Kivy.
 - `android_src/` — Berisi kode Java untuk komponen Android yang digunakan proyek.
-- `README.md` — Berisi dokumentasi proyek dan panduan penggunaan.
+- `screenshots/` — Menyimpan gambar tampilan aplikasi untuk dokumentasi.
+- `README.md` — Berisi deskripsi proyek dan panduan penggunaan.
 
-Struktur di atas merupakan gambaran ringkas. Tambahkan folder atau berkas lain jika memang terdapat dalam proyek final.
+Struktur di atas merupakan contoh ringkas. Sesuaikan dengan struktur proyek yang sebenarnya.
 
 ## ▶️ Menjalankan Proyek
 
-Untuk menjalankan proyek dari kode sumber, siapkan lingkungan Python dan dependensi yang diperlukan.
+Untuk menjalankan kode sumber, siapkan Python dan seluruh dependensi yang diperlukan.
 
-1. Unduh atau klon repositori proyek.
-2. Buka folder proyek di VS Code.
-3. Pasang dependensi yang dibutuhkan sesuai konfigurasi proyek.
-4. Pastikan berkas database dan konfigurasi aplikasi tersedia.
-5. Jalankan aplikasi melalui entry point yang digunakan proyek.
-
-Contoh perintah jika lingkungan dan dependensi telah siap:
+Jika lingkungan pengembangan telah siap, aplikasi dapat dijalankan melalui terminal menggunakan:
 
 ```bash
 python main.py
 ```
 
-**Catatan:** Perintah ini ditujukan untuk menjalankan proyek dalam lingkungan Python yang sesuai. Proses build APK Android membutuhkan konfigurasi dan dependensi Android tambahan.
-
-## 🔒 Penyimpanan Data dan Privasi
-
-Aplikasi menggunakan SQLite untuk menyimpan data secara lokal sesuai implementasi proyek.
-
-Pengguna sebaiknya menjaga kerahasiaan informasi akun dan menggunakan aplikasi pada perangkat yang tepercaya. Untuk penggunaan yang lebih aman, penyimpanan kata sandi perlu menggunakan metode hashing yang sesuai dan bukan teks biasa.
+Perintah tersebut digunakan untuk menjalankan proyek dalam lingkungan Python yang sesuai. Pembuatan APK Android membutuhkan konfigurasi build dan dependensi Android tambahan.
 
 ## ⚠️ Pemecahan Masalah
 
 **Tidak bisa login**
-- Periksa kembali alamat email dan kata sandi.
+- Periksa kembali email dan kata sandi.
 - Pastikan akun telah terdaftar.
 
 **Notifikasi tidak muncul**
-- Periksa izin notifikasi pada pengaturan Android.
-- Pastikan tugas memiliki deadline yang sesuai.
-- Periksa pengaturan baterai dan pembatasan aktivitas latar belakang perangkat.
+- Periksa izin notifikasi Android.
+- Periksa deadline dan penjadwalan pengingat.
+- Periksa pengaturan baterai atau pembatasan aplikasi di perangkat.
 
 **Tugas tidak muncul**
-- Periksa tab tugas atau kebiasaan yang sedang dipilih.
-- Pastikan tugas belum selesai atau terhapus.
-- Coba buka kembali halaman daftar aktivitas.
+- Periksa tab tugas atau kebiasaan.
+- Pastikan aktivitas belum selesai atau terhapus.
+- Buka kembali halaman daftar aktivitas.
 
-**Aplikasi tidak dapat dibuka**
-- Pastikan APK berasal dari build yang benar.
-- Periksa kompatibilitas perangkat.
-- Jika masalah berlanjut, hubungi pengembang.
+**Screenshot tidak tampil di README**
+- Pastikan gambar berada di folder `screenshots`.
+- Periksa kembali nama file dan ekstensi gambar.
+- Pastikan jalur gambar di README sesuai dengan lokasi file.
+- Buka tab Preview untuk memeriksa tampilan Markdown.
 
 ## 👨‍💻 Informasi Pengembang
 
-- **Nama aplikasi:** DoIt!
-- **Jenis aplikasi:** Todo List & Habit Tracker
+- **Nama Aplikasi:** DoIt!
+- **Jenis Aplikasi:** Todo List & Habit Tracker
 - **Platform:** Android
-- **Bahasa pemrograman:** Python dan Java untuk komponen Android
-- **Penyimpanan:** SQLite
-- **Pengembang:** [Nama Kamu]
+- **Bahasa Pemrograman:** Python dan Java untuk komponen Android
+- **Framework:** Kivy/KivyMD
+- **Database:** SQLite
+- **Nama Pengembang:** [Nama Kamu]
 - **Sekolah:** [Nama Sekolah]
-- **Program keahlian:** [Program Keahlian]
-- **Tahun:** [Tahun Pembuatan]
+- **Program Keahlian:** [Program Keahlian]
+- **Tahun Pembuatan:** [Tahun]
 
 ## 📄 Lisensi
 
-Proyek ini dibuat untuk keperluan pembelajaran dan proyek akhir sekolah. Ketentuan penggunaan atau distribusi lebih lanjut mengikuti keputusan pengembang.
+Proyek ini dikembangkan untuk keperluan pembelajaran dan proyek akhir sekolah. Ketentuan penggunaan atau distribusi lebih lanjut mengikuti keputusan pengembang.
 
 ---
 
