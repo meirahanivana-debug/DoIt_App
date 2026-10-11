@@ -1,7 +1,0 @@
-env/
-__pycache__/
-*.db
-.vscode/
-.buildozer/
-venv_buildozer/
-bin/
